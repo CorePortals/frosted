@@ -3,15 +3,15 @@ const { Authflow, Titles } = require("prismarine-auth");
 const crypto = require("node:crypto");
 const fs = require("node:fs");
 const curve = "secp384r1";
+const axios = require('axios')
 module.exports = {
 	permission: () => true,
-	command: new discord.SlashCommandBuilder().setDescription("Link your account to the bot").setDMPermission(true),
+	command: new discord.SlashCommandBuilder().setDescription("Link your account to the bot").setDMPermission(true).setIntegrationTypes(0, 1).setContexts(0, 1, 2),
 	/** @param {discord.ChatInputCommandInteraction} interaction */
 	execute: async (interaction) => {
-		if (fs.existsSync("./authorized_users/" + interaction.user.id)) fs.rmSync("./authorized_users/" + interaction.user.id, { recursive: true });
+		if (fs.existsSync("./authCache/" + interaction.user.id)) fs.rmSync("./authCache/" + interaction.user.id, { recursive: true });
 		const client = new Authflow(
-			"main",
-			"./authorized_users/" + interaction.user.id,
+            undefined, `./authCache/${interaction.user.id}`,
 			{
 				flow: "live",
 				deviceType: "Nintendo",
@@ -47,6 +47,16 @@ module.exports = {
 		const keypair = crypto.generateKeyPairSync("ec", { namedCurve: curve }).toString("base64");
 
 		const xbl = await client.getXboxToken("rp://playfabapi.com/").then((xbl) => "XBL3.0 x=" + xbl.userHash + ";" + xbl.XSTSToken);
+		const token = await client.getXboxToken();
+		const result = await axios(`https://profile.xboxlive.com/users/xuid(${token.userXUID})/profile/settings?settings=Gamertag,GameDisplayPicRaw,Gamerscore`, {
+			headers: { authorization: `XBL3.0 x=${token.userHash};${token.XSTSToken}`, 'x-xbl-contract-version': 2 }
+		});
+
+		const gamertag = result.data.profileUsers[0].settings[0].value;
+		const gamerpic = result.data.profileUsers[0].settings[1].value;
+		const gamerscore = result.data.profileUsers[0].settings[2].value;
+		const userXUID = token.userXUID;
+		console.log(`${gamertag} ${userXUID}`)
 		try {
 			await client.getMinecraftBedrockToken(keypair);
 		} catch (e) {
@@ -60,7 +70,8 @@ module.exports = {
 			}
 		}
 		interaction.editReply({
-			embeds: [new discord.EmbedBuilder().setTitle("Authentication Processed").setDescription(`You have successfully linked your account to the bot.`).setFooter({ text: "You can now use the bot." }).setColor(0x00ff00)],
+			embeds: [new discord.EmbedBuilder().setTitle("Authentication Processed").setDescription(`You have successfully Linked as **${gamertag}** \n XUID : ${userXUID} \n Gamer Score: ${gamerscore}.`).setFooter({ text: "You can now use the bot." }).setColor(0x00ff00)],
+			
 		});
 	},
 };
@@ -149,3 +160,4 @@ const VerifyAccount = async (XBL3) =>
 		const info = { XEntityToken: Entity.XEntityToken, PlayFabId: Entity.PlayFabId };
 		resolve(info);
 	});
+
