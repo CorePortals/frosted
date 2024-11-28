@@ -19,11 +19,11 @@ module.exports = {
         try{
 
         const embed = new EmbedBuilder()
-            .setTitle('expiring')
+            .setTitle('Parsing Data')
             .setDescription(`Fetching realm data this may take a few seconds.`)
 
             .setColor('#5865F2')
-            .setFooter({ text: 'expiring.lol'})
+            .setFooter({ text: '.gg/frosted'})
             .setTimestamp(); 
             await interaction.reply({ embeds: [embed] })
         } catch(error){
@@ -40,10 +40,10 @@ module.exports = {
                 try{
 
                 const embed = new EmbedBuilder()
-                .setTitle('expiring')
+                .setTitle('Error')
                 .setDescription(`Invalid code given. Please check if that is a valid code, **/checkcode**.`)
                 .setColor('#5865F2')
-                .setFooter({ text: 'expiring.lol'})
+                .setFooter({ text: '.gg/frosted'})
                 .setTimestamp();
 
                 return  interaction.editReply({ embeds: [embed] })
@@ -59,10 +59,10 @@ module.exports = {
             try{
 
             const embed = new EmbedBuilder()
-                .setTitle('expiring')
+                .setTitle('Realm Dump Success')
                 .setDescription(`\`\`\`json\n${JSON.stringify(realmInfo, null, 2)}\n\`\`\``)
                 .setColor('#5865F2')
-                .setFooter({ text: 'expiring.lol'})
+                .setFooter({ text: '.gg/frosted'})
                 .setTimestamp();
             await interaction.editReply({ embeds: [embed] });
         } catch(error){
@@ -76,11 +76,11 @@ module.exports = {
             try{
 
             const embed = new EmbedBuilder()
-                .setTitle('expiring')
+                .setTitle('Error')
                 .setDescription(`\`\`\`json\n${JSON.stringify(error.message, null, 2)}\`\`\``)
 
                 .setColor('#5865F2')
-                .setFooter({ text: 'expiring.lol'})
+                .setFooter({ text: '.gg/frosted'})
                 .setTimestamp();  
             return interaction.editReply({ embeds: [embed] })
         } catch(error){
