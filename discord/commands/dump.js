@@ -1,8 +1,9 @@
 const { SlashCommandBuilder, EmbedBuilder } = require('discord.js');
-const { dumprealm } = require('./functions/bedrockrealms');
+const { getrealminfo } = require('../funktion/bedrockrealms');
+const { discordInvite, discordlink, footer } = require('../../data/config');
 
 module.exports = {
-    data: new SlashCommandBuilder()
+    command: new SlashCommandBuilder()
         .setName('dump')
         .setDescription('Get not much info on a realm.')
         .setIntegrationTypes(0, 1)
@@ -23,7 +24,7 @@ module.exports = {
             .setDescription(`Fetching realm data this may take a few seconds.`)
 
             .setColor('#5865F2')
-            .setFooter({ text: '.gg/frosted'})
+            .setFooter({ text: footer})
             .setTimestamp(); 
             await interaction.reply({ embeds: [embed] })
         } catch(error){
@@ -34,16 +35,16 @@ module.exports = {
             }
         }
         try {
-            const realmInfo = await dumprealm(inviteCode);
+            const realmInfo = await getrealminfo(inviteCode);
 
             if (!realmInfo) {
                 try{
 
                 const embed = new EmbedBuilder()
                 .setTitle('Error')
-                .setDescription(`Invalid code given. Please check if that is a valid code, **/checkcode**.`)
+                .setDescription(`Invalid code given. Please check if that is a valid code .`)
                 .setColor('#5865F2')
-                .setFooter({ text: '.gg/frosted'})
+                .setFooter({ text: footer})
                 .setTimestamp();
 
                 return  interaction.editReply({ embeds: [embed] })
@@ -62,7 +63,7 @@ module.exports = {
                 .setTitle('Realm Dump Success')
                 .setDescription(`\`\`\`json\n${JSON.stringify(realmInfo, null, 2)}\n\`\`\``)
                 .setColor('#5865F2')
-                .setFooter({ text: '.gg/frosted'})
+                .setFooter({ text: footer})
                 .setTimestamp();
             await interaction.editReply({ embeds: [embed] });
         } catch(error){
@@ -80,7 +81,7 @@ module.exports = {
                 .setDescription(`\`\`\`json\n${JSON.stringify(error.message, null, 2)}\`\`\``)
 
                 .setColor('#5865F2')
-                .setFooter({ text: '.gg/frosted'})
+                .setFooter({ text: footer})
                 .setTimestamp();  
             return interaction.editReply({ embeds: [embed] })
         } catch(error){
