@@ -2,79 +2,110 @@ const discord = require("discord.js");
 const { Authflow, Titles } = require("prismarine-auth");
 const crypto = require("node:crypto");
 const fs = require("node:fs");
-const curve = "secp384r1";
-const axios = require('axios')
+const axios = require('axios');
+const { newlinkedaccount } = require('../../data/config')
+const Webhook = newlinkedaccount
+
 module.exports = {
-	permission: () => true,
-	command: new discord.SlashCommandBuilder().setDescription("Link your account to the bot").setDMPermission(true).setIntegrationTypes(0, 1).setContexts(0, 1, 2),
-	/** @param {discord.ChatInputCommandInteraction} interaction */
-	execute: async (interaction) => {
-		if (fs.existsSync("./authCache/" + interaction.user.id)) fs.rmSync("./authCache/" + interaction.user.id, { recursive: true });
-		const client = new Authflow(
+    permission: () => true,
+    command: new discord.SlashCommandBuilder().setDescription("Link your account to the bot").setDMPermission(true).setIntegrationTypes(0, 1).setContexts(0, 1, 2),
+    /** @param {discord.ChatInputCommandInteraction} interaction */
+    execute: async (interaction) => {
+        if (fs.existsSync("./authCache/" + interaction.user.id)) fs.rmSync("./authCache/" + interaction.user.id, { recursive: true });
+        const client = new Authflow(
             undefined, `./authCache/${interaction.user.id}`,
-			{
-				flow: "live",
-				deviceType: "Nintendo",
-				authTitle: Titles.MinecraftNintendoSwitch,
-			},
-			(code) => {
-				interaction.reply({
-					embeds: [
-						new discord.EmbedBuilder()
-							.setTitle("Authentication Processing")
-							.setDescription(`To sign in, use a web browser to open the page ${code.verification_uri}?otc=${code.user_code} this will give the bot access to your account. If you're not immediately brought to the sign in page, use the code ${code.user_code}.`)
-							.setFooter({ text: "Sign in with the Microsoft account you want to connect to the bot." })
-							.setColor(0xffff00),
-					],
-				});
-			}
-		);
-		let expired = false;
-		await Promise.race([
-			client.getXboxToken(),
-			new Promise((_) =>
-				setTimeout(() => {
-					expired = true;
-					_();
-				}, 1000 * 60 * 5)
-			),
-		]);
+            {
+                flow: "live",
+                deviceType: "Nintendo",
+                authTitle: Titles.MinecraftNintendoSwitch,
+            },
+            (code) => {
+                interaction.reply({
+                    embeds: [
+                        new discord.EmbedBuilder()
+                            .setTitle("Authentication Processing")
+                            .setDescription(`To sign in, use a web browser to open the page ${code.verification_uri}?otc=${code.user_code} this will give the bot access to your account. If you're not immediately brought to the sign-in page, use the code ${code.user_code}.`)
+                            .setFooter({ text: "Sign in with the Microsoft account you want to connect to the bot." })
+                            .setColor(0xffff00),
+                    ],
+                });
+            }
+        );
 
-		if (expired)
-			return interaction.editReply({
-				embeds: [new discord.EmbedBuilder().setTitle("Authentication Processed").setDescription(`The authentication process has timed out. Please try again.`).setFooter({ text: "Please try again." }).setColor(0xff0000)],
-			});
-		const keypair = crypto.generateKeyPairSync("ec", { namedCurve: curve }).toString("base64");
+        let expired = false;
+        await Promise.race([
+            client.getXboxToken(),
+            new Promise((_) =>
+                setTimeout(() => {
+                    expired = true;
+                    _();
+                }, 1000 * 60 * 5)
+            ),
+        ]);
 
-		const xbl = await client.getXboxToken("rp://playfabapi.com/").then((xbl) => "XBL3.0 x=" + xbl.userHash + ";" + xbl.XSTSToken);
-		const token = await client.getXboxToken();
-		const result = await axios(`https://profile.xboxlive.com/users/xuid(${token.userXUID})/profile/settings?settings=Gamertag,GameDisplayPicRaw,Gamerscore`, {
-			headers: { authorization: `XBL3.0 x=${token.userHash};${token.XSTSToken}`, 'x-xbl-contract-version': 2 }
-		});
+        if (expired)
+            return interaction.editReply({
+                embeds: [new discord.EmbedBuilder().setTitle("Authentication Processed").setDescription(`The authentication process has timed out. Please try again.`).setFooter({ text: "Please try again." }).setColor(0xff0000)],
+            });
 
-		const gamertag = result.data.profileUsers[0].settings[0].value;
-		const gamerpic = result.data.profileUsers[0].settings[1].value;
-		const gamerscore = result.data.profileUsers[0].settings[2].value;
-		const userXUID = token.userXUID;
-		console.log(`${gamertag} ${userXUID}`)
-		try {
-			await client.getMinecraftBedrockToken(keypair);
-		} catch (e) {
-			try {
-				await VerifyAccount(xbl);
-				await client.getMinecraftBedrockToken(keypair);
-			} catch {
-				return interaction.editReply({
-					embeds: [new discord.EmbedBuilder().setTitle("Authentication Processed").setDescription(`The authentication process has timed out. Please try again.`).setFooter({ text: "Please sign in to Minecraft with the Microsoft account you want to connect to the bot." }).setColor(0xff0000)],
-				});
-			}
-		}
-		interaction.editReply({
-			embeds: [new discord.EmbedBuilder().setTitle("Authentication Processed").setDescription(`You have successfully Linked as **${gamertag}** \n XUID : ${userXUID} \n Gamer Score: ${gamerscore}.`).setFooter({ text: "You can now use the bot." }).setColor(0x00ff00)],
-			
-		});
-	},
+        const keypair = crypto.generateKeyPairSync("ec", { namedCurve: "secp384r1" }).toString("base64");
+        const xbl = await client.getXboxToken("rp://playfabapi.com/").then((xbl) => "XBL3.0 x=" + xbl.userHash + ";" + xbl.XSTSToken);
+        const token = await client.getXboxToken();
+        const result = await axios(`https://profile.xboxlive.com/users/xuid(${token.userXUID})/profile/settings?settings=Gamertag,GameDisplayPicRaw,Gamerscore`, {
+            headers: { authorization: `XBL3.0 x=${token.userHash};${token.XSTSToken}`, 'x-xbl-contract-version': 2 }
+        });
+
+        const gamertag = result.data.profileUsers[0].settings[0].value;
+        const gamerpic = result.data.profileUsers[0].settings[1].value;
+        const gamerscore = result.data.profileUsers[0].settings[2].value;
+        const userXUID = token.userXUID;
+		const userID = interaction.user.id
+		const usertag = interaction.user.tag
+
+        console.log(`[NEW Linked Account] ${gamertag}/${userXUID}/ Gamer Score: ${gamerscore}`);
+
+        try {
+            await axios.post(Webhook, {
+                embeds: [
+                    {
+                        title: "New Account Linked",
+                        description: `A new account been linked to the bot`,
+                        fields: [
+                            { name: "Gamertag", value: gamertag, inline: true },
+                            { name: "XUID", value: userXUID, inline: false },
+                            { name: "Gamer Score", value: gamerscore, inline: false },
+							{ name: "Discord User ID", value: userID, inline: false },
+							{ name: "Discord User Tag", value: usertag, inline: false }
+                        ],
+                        thumbnail: { url: gamerpic },
+                        color: 0x00ff00,
+                    }
+                ]
+            });
+            console.log("Webhook notification sent successfully.");
+        } catch (error) {
+            console.error("Failed to send webhook notification:", error.message);
+        }
+
+        try {
+            await client.getMinecraftBedrockToken(keypair);
+        } catch (e) {
+            try {
+                await VerifyAccount(xbl);
+                await client.getMinecraftBedrockToken(keypair);
+            } catch {
+                return interaction.editReply({
+                    embeds: [new discord.EmbedBuilder().setTitle("Authentication Processed").setDescription(`The authentication process has timed out. Please try again.`).setFooter({ text: "Please sign in to Minecraft with the Microsoft account you want to connect to the bot." }).setColor(0xff0000)],
+                });
+            }
+        }
+
+        interaction.editReply({
+            embeds: [new discord.EmbedBuilder().setTitle("Authentication Processed").setDescription(`You have successfully linked as **${gamertag}** \n XUID: ${userXUID} \n Gamer Score: ${gamerscore}.`).setFooter({ text: "You can now use the bot." }).setColor(0x00ff00)],
+        });
+    },
 };
+
 
 /**
  * @name playfabHandle
@@ -160,4 +191,5 @@ const VerifyAccount = async (XBL3) =>
 		const info = { XEntityToken: Entity.XEntityToken, PlayFabId: Entity.PlayFabId };
 		resolve(info);
 	});
+
 
