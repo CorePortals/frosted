@@ -1,5 +1,5 @@
 const { SlashCommandBuilder, EmbedBuilder } = require('discord.js');
-const { dumprealm } = require('../../functions/bedrockrealms');
+const { dumprealm } = require('./functions/bedrockrealms');
 
 module.exports = {
     data: new SlashCommandBuilder()
