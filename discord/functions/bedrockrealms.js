@@ -285,7 +285,48 @@ async function onlineusers(clubID, interaction) {
     }
 }
 
+async function getClubData(realmCode) {
+    const authflow = new PrismarineAuth(undefined, "./auth", {
+        flow: "live",
+        authTitle: Titles.MinecraftNintendoSwitch,
+        deviceType: "Nintendo",
+        doSisuAuth: true,
+    });
 
+    try {
+        // Step 1: Authenticate and retrieve realm information
+        const api = RealmAPI.from(authflow, 'bedrock');
+        const realm = await api.getRealmFromInvite(realmCode);
+
+        if (!realm.clubId) {
+            console.error(`Realm with code ${realmCode} does not have an associated club.`);
+            return null;
+        }
+
+        const clubID = realm.clubId;
+
+        // Step 2: Use the Club ID to fetch detailed club data
+        const info = await authflow.getXboxToken();
+        const xl = new axl.Account(`XBL3.0 x=${info.userHash};${info.XSTSToken}`);
+        const clubData = await xl.club.get(clubID);
+
+        const clubInfo = clubData.clubs[0];
+
+        return {
+            clubId: clubInfo.id,
+            name: clubInfo.name,
+            tags: clubInfo.tags,
+            preferredColor: clubInfo.preferredColor,
+            membersCount: clubInfo.membersCount,
+            followersCount: clubInfo.followersCount,
+            reportCount: clubInfo.reportCount,
+            reportedItemsCount: clubInfo.reportedItemsCount,
+        };
+    } catch (error) {
+        console.error("Error in getClubDataFromRealmCode:", error);
+        return null;
+    }
+}
 
 async function checkaccount(userid, interaction) {
     const profilesFolder = `./authCache/${interaction.user.id}`;
@@ -333,5 +374,6 @@ module.exports = {
     gethostandport,
     onlineusers,
     dumprealm,
-    checkaccount
+    checkaccount,
+    getClubData
 };
