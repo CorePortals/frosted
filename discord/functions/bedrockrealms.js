@@ -16,7 +16,7 @@ const { v4: uuidv4 } = require("uuid");
 
 // Get realm info with a return a full json
 async function getrealminfo(invite) {
-    const authflow = new PrismarineAuth('freeaccount', `./mcbot/data/user/auth/freeacc`, { 
+    const authflow = new PrismarineAuth(undefined, "./auth", { 
         flow: "live", 
         authTitle: Titles.MinecraftNintendoSwitch, 
         deviceType: "Nintendo", 
@@ -26,7 +26,7 @@ async function getrealminfo(invite) {
     const api = RealmAPI.from(authflow, 'bedrock');
 
     try {
-        const dumpedData = JSON.parse(fs.readFileSync('./mcbot/data/realms/dumped.json', 'utf8'));
+        const dumpedData = JSON.parse(fs.readFileSync('./logs/realms/dump.json', 'utf8'));
 
         
         const realm = await api.getRealmFromInvite(invite);
@@ -103,7 +103,7 @@ async function getrealminfo(invite) {
         };
 
         dumpedData.push(realminfo);
-        await fs.writeFileSync('./mcbot/data/realms/dumped.json', JSON.stringify(dumpedData, null, 2));
+        await fs.writeFileSync('./logs/realms/dump.json', JSON.stringify(dumpedData, null, 2));
 
         return realminfo;
     } catch (error) {
@@ -114,7 +114,7 @@ async function getrealminfo(invite) {
 
 // less requests
 async function gethostandport(invite) {
-    const authflow = await new PrismarineAuth('freeaccount', `./mcbot/data/user/auth/freeacc`, { 
+    const authflow = await new PrismarineAuth(undefined, "./auth", { 
         flow: "live", 
         authTitle: Titles.MinecraftNintendoSwitch, 
         deviceType: "Nintendo", 
@@ -155,7 +155,7 @@ async function gethostandport(invite) {
 
 // Get realm info with a return a full json
 async function dumprealm(invite) {
-    const authflow = new PrismarineAuth('freeaccount', `./mcbot/data/user/auth/freeacc`, { 
+    const authflow = new PrismarineAuth(undefined, "./auth", { 
         flow: "live", 
         authTitle: Titles.MinecraftNintendoSwitch, 
         deviceType: "Nintendo", 
@@ -215,7 +215,7 @@ async function dumprealm(invite) {
 
 
 async function onlineusers(clubID, interaction) {
-    const authflow = new PrismarineAuth('freeaccount', `./mcbot/data/user/auth/freeacc`, { 
+    const authflow = new PrismarineAuth(undefined, `./auth`, { 
         flow: "live", 
         authTitle: Titles.MinecraftNintendoSwitch, 
         deviceType: "Nintendo", 
@@ -288,8 +288,8 @@ async function onlineusers(clubID, interaction) {
 
 
 async function checkaccount(userid, interaction) {
-    const profilesFolder = `./mcbot/data/user/auth/${interaction.user.id}`;
-    const accountsPath = path.join('./mcbot/data/user/database.json');
+    const profilesFolder = `./authCache/${interaction.user.id}`;
+    const accountsPath = path.join('./data/users.json');
     let accountsData;
     let linked = false;
 
