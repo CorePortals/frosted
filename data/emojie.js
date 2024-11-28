@@ -1,29 +1,18 @@
-const accseptEmoji = "<a:Check:1256612972793565204>"
-const errorEmoji = "<:deny:1256622572762562681>"
-const loadingemoji = "<a:loading:1256535355138768906>"
-const reply1 = "<:replycountinue:1258168190861709484>"
-const reply2 = "<:reply:1258168210486726726>"
-const funnyEmoji = "<a:DyingLaughing:1244399086061355090>"
-const coin = "<:Minecoin:1287391842551336960>"
-const trollEmojie = "<:HDtroll:1246615956176769024>"
-const loadingEmoji = "<a:loading:1256535355138768906>"
-
-
-
+const cat1 = "<a:CatSkateBoard:1311040204978786415>"
+const error = "<:minecraft_deny:1311028391805325373>"
+const loading = "<:loading:1311028884245844039>"
+const replystart = "<:arrow2_b:1311040348830568478>"
+const replyend = "<:arrow_b:1311040380183248998>"
 
 
 
 
 module.exports = {
-    errorEmoji,
-    accseptEmoji,
-    loadingemoji,
-    reply1,
-    reply2,
-    funnyEmoji,
-    coin,
-    trollEmojie,
-    loadingEmoji
+    cat1,
+    error,
+    loading,
+    replystart,
+    replyend
 
 
 }
