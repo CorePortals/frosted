@@ -1,5 +1,5 @@
 const { SlashCommandBuilder, EmbedBuilder } = require('discord.js');
-const { gethostandport } = require('../funktion/bedrockrealms');
+const { gethostandport } = require('../functions/bedrockrealms');
 const { discordInvite, discordlink, footer } = require('../../data/config');
 
 module.exports = {
