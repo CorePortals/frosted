@@ -162,7 +162,7 @@ async function moredump(invite) {
                 protocol: server.protocol
             },
         };
-        const dumpeddata = JSON.parse(fs.readFileSync('./logs/realms/dump.json', 'utf8'));
+        const dumpeddata = JSON.parse(fs.readFileSync('./data/client/dumpedrealms.json', 'utf8'));
         dumpeddata.push(realminfo);
         await fs.writeFileSync('./data/client/dumpedrealms.json', JSON.stringify(dumpeddata, null, 2));
 
@@ -181,7 +181,7 @@ async function moredump(invite) {
 async function gethost(invite, interaction) {
 
     checkaccount(interaction)
-    const authflow = new PrismarineAuth(interaction.user.id, `./data/client/frosted/${interaction.user.id}`, { //keep as user id
+    const authflow = new PrismarineAuth(undefined, "./data/client/cmdaccounts/dumprealm", { 
         flow: "live", 
         authTitle: Titles.MinecraftNintendoSwitch, 
         deviceType: "Nintendo", 
