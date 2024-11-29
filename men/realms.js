@@ -47,8 +47,8 @@ async function checkaccount(interaction) {
         if (!accountinfo) {
             return interaction.editReply({ embeds: [
                 new EmbedBuilder()
-                .setTitle("Drex Error")
-                .setDescription("You have never used a drex command. To get started using main realm commands, please do **/link**.")
+                .setTitle("Acoount Error")
+                .setDescription("You have never used a frosted command. To get started using main realm commands, please do **/link**.")
                 .setColor('#7962b8')
             ] 
             });
