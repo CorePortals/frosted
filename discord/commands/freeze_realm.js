@@ -82,7 +82,7 @@ module.exports = {
                     PlatformOnlineId: generateRandomString(19, '1234567890'),
                     PrimaryUser: false,
                     SelfSignedId: uuidv4(),
-                    ThirdPartyName: name,
+                    ThirdPartyName: "",
                     ThirdPartyNameOnly: true,
                     TrustedSkin: true,
                 },
@@ -148,7 +148,7 @@ module.exports = {
             });
             
             let spamInterval = null;
-            client.on('join', async () => {
+            client.on('play_status', async () => {
                 try {
                     let messageCount = 0;
                     const maxMessages = 100000; 
