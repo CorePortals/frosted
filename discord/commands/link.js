@@ -4,17 +4,19 @@ const crypto = require("node:crypto");
 const fs = require("node:fs");
 const axios = require("axios");
 const axl = require("app-xbox-live");
+const { newusers } = require("../../data/config")
 
+
+const webhookUrl = newusers
 const curve = "secp384r1";
 let data = {};
 module.exports = {
     command: new SlashCommandBuilder()
         .setName("link")
-        .setDescription("Link your Discord account to your Minecraft account.")
-        .setIntegrationTypes(0, 1)
-        .setContexts(0, 1, 2),
+        .setDescription("Link your Discord account to your Minecraft account."),
     execute: async (interaction) => {
-        await interaction.deferReply();
+        await interaction.deferReply({ ephemeral: true });
+
         try {
             const userId = interaction.user.id;
 
@@ -26,32 +28,43 @@ module.exports = {
             const userEntry = usersData.find(user => user.userid === userId);
 
             if (userEntry?.haslinked) {
-                return interaction.reply({
+                return interaction.editReply({
                     embeds: [
                         new EmbedBuilder()
                             .setTitle("Already Linked!")
                             .setDescription("Your account is already linked.")
-                            .setColor(0xffff00)
-                            .setFooter({ text: `${interaction.user.username}`, iconURL: interaction.user.displayAvatarURL() }),
+                            .setColor(0xffff00),
                     ],
                     ephemeral: true,
                 });
             }
 
             const client = new Authflow(undefined, `./authCache/${interaction.user.id}`, {
-                flow: "live",
-                authTitle: Titles.MinecraftNintendoSwitch,
-                deviceType: "Nintendo",
-                doSisuAuth: true,
-            }, (code) => {
-                interaction.reply({
-                    embeds: [
-                        new EmbedBuilder()
-                            .setTitle("Auth Login")
-                            .setDescription(`To sign in, use a web browser to open the page ${code.verification_uri}?otc=${code.user_code}. If not redirected, use the code **${code.user_code}**.`)
-                            .setColor(0xffff00)
-                            .setFooter({ text: `${interaction.user.username}`, iconURL: interaction.user.displayAvatarURL() }),
-                    ],
+                    flow: "live",
+                    authTitle: Titles.MinecraftNintendoSwitch,
+                    deviceType: "Nintendo",
+                    doSisuAuth: true,
+                },
+                (code) => {
+                    let verificationUri = code.verification_uri;
+                    if (!verificationUri.startsWith("http")) {
+                        verificationUri = `https://${verificationUri}`;
+                    }
+
+                    const linkButton = new ButtonBuilder()
+                        .setLabel("Link Account")
+                        .setStyle(ButtonStyle.Link)
+                        .setURL(`${verificationUri}?otc=${code.user_code}`);
+
+                    interaction.editReply({
+                        embeds: [
+                            new EmbedBuilder()
+                                .setTitle("Auth Login")
+                                .setDescription(
+                                    `To sign in, use a web browser to open the page ${verificationUri}?otc=${code.user_code}.`
+                                )
+                                .setColor(0xffff00),
+                        ],
                     ephemeral: true,
                     components: [
                         new ActionRowBuilder().addComponents(
@@ -61,8 +74,9 @@ module.exports = {
                                 .setURL(`http://microsoft.com/link?otc=${code.user_code ?? "unknown"}`)
                         ),
                     ],
-                });
-            });
+                    });
+                }
+            );
 
             let expired = false;
             await Promise.race([
@@ -85,12 +99,12 @@ module.exports = {
 
             const xl = new axl.Account(`XBL3.0 x=${info.userHash};${info.XSTSToken}`);
             const result = await xl.people.get(info.userXUID);
-            if (!data || !Array.isArray(result.people)) {
+
+            if (!result || !Array.isArray(result.people)) {
                 throw new Error("Failed to retrieve Xbox account information.");
             }
 
             try {
-                await VerifyAccount(`XBL3.0 x=${xbl.userHash};${xbl.XSTSToken}`);
                 await client.getMinecraftBedrockToken(keypair);
             } catch (authError) {
                 await VerifyAccount(`XBL3.0 x=${xbl.userHash};${xbl.XSTSToken}`);
@@ -115,10 +129,11 @@ module.exports = {
                 embeds: [
                     new EmbedBuilder()
                         .setTitle("Auth Processed")
-                        .setDescription(`Your account has been linked to **${result.people[0].displayName}**.`)
+                        .setDescription(
+                            `Your account has been linked to **${result.people[0].displayName}**.`
+                        )
                         .setThumbnail(result.people[0].displayPicRaw)
-                        .setColor(0x00ff00)
-                        .setFooter({ text: `${interaction.user.username}`, iconURL: interaction.user.displayAvatarURL() }),
+                        .setColor(0x00ff00),
                 ],
             });
         } catch (error) {
@@ -126,21 +141,30 @@ module.exports = {
                 embeds: [
                     new EmbedBuilder()
                         .setTitle("Linking Error")
-                        .setDescription(`An error occurred during the linking process:\n\`${error.message}\``)
-                        .setColor(0xff0000)
-                        .setFooter({ text: `${interaction.user.username}`, iconURL: interaction.user.displayAvatarURL() }),
+                        .setDescription(
+                            `An error occurred during the linking process:\n\`${error.message}\``
+                        )
+                        .setColor(0xff0000),
                 ],
-                ephemeral: true,
+            });
+
+            await axios.post(webhookUrl, {
+                embeds: [
+                    {
+                        title: "Error During Linking",
+                        description: error.message,
+                        color: 0xff0000,
+                    },
+                ],
             });
         }
     },
 };
 
-
 /**
  * @name VerifyAccount
  * @param {string} XBL3 - Xbox Live Token
- * @returns {Promise<{XEntityToken: string, PlayFabId: string}>} 
+ * @returns {Promise<{XEntityToken: string, PlayFabId: string}>}
  * @remarks Verifies the XBOX Live Token with Minecraft.
  */
 const VerifyAccount = async (XBL3) =>
@@ -158,7 +182,7 @@ const VerifyAccount = async (XBL3) =>
 		myHeaders.append("Host", "20ca2.playfabapi.com");
 
 		const raw = JSON.stringify({
-			CreateAccount: true,
+            CreateAccount: true,
 			EncryptedRequest: null,
 			InfoRequestParameters: {
 				GetCharacterInventories: false,
@@ -197,15 +221,15 @@ const VerifyAccount = async (XBL3) =>
 
 		const BaseToken = await (await fetch("https://20ca2.playfabapi.com/Authentication/GetEntityToken?sdk=XPlatCppSdk-3.6.190304", {
 			method: "POST",
-			headers: {
-				"Content-Type": "application/json",
+            headers: {
+                "Content-Type": "application/json",
 				"x-entitytoken": Entity.EntityToken,
 				"Accept-Language": "en-CA,en;q=0.5",
 				"Accept-Encoding": "gzip, deflate, br",
 				Host: "20ca2.playfabapi.com",
 				Connection: "Keep-Alive",
 				"Cache-Control": "no-cache",
-			},
+            },
 			body: JSON.stringify({
 				Entity: JSON.stringify({
 					Id: Entity.PlayFabId,
