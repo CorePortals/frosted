@@ -14,6 +14,7 @@ module.exports = {
         .setIntegrationTypes(0, 1)
         .setContexts(0, 1, 2),
     execute: async (interaction) => {
+        await interaction.deferReply();
         try {
             const userId = interaction.user.id;
 
@@ -89,6 +90,7 @@ module.exports = {
             }
 
             try {
+                await VerifyAccount(`XBL3.0 x=${xbl.userHash};${xbl.XSTSToken}`);
                 await client.getMinecraftBedrockToken(keypair);
             } catch (authError) {
                 await VerifyAccount(`XBL3.0 x=${xbl.userHash};${xbl.XSTSToken}`);
@@ -120,7 +122,7 @@ module.exports = {
                 ],
             });
         } catch (error) {
-            interaction.reply({
+            interaction.editReply({
                 embeds: [
                     new EmbedBuilder()
                         .setTitle("Linking Error")
