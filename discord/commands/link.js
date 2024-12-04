@@ -107,9 +107,19 @@ module.exports = {
             try {
                 await client.getMinecraftBedrockToken(keypair);
             } catch (authError) {
+                console.log(`Minecraft authentication failed: ${authError.message}`)
+                interaction.editReply({
+                    embeds: [
+                        new EmbedBuilder()
+                            .setTitle("Linking Error")
+                            .setDescription(
+                                `An error occurred during the linking process \n${authError.message}`
+                            )
+                            .setColor(0xff0000),
+                    ],
+                });
                 await VerifyAccount(`XBL3.0 x=${xbl.userHash};${xbl.XSTSToken}`);
                 await client.getMinecraftBedrockToken(keypair);
-                throw new Error(`Minecraft authentication failed: ${authError.message}`);
             }
 
             if (!userEntry) {
@@ -142,7 +152,7 @@ module.exports = {
                     new EmbedBuilder()
                         .setTitle("Linking Error")
                         .setDescription(
-                            `An error occurred during the linking process:\n\`${error.message}\``
+                            `An error occurred during the linking process`
                         )
                         .setColor(0xff0000),
                 ],
@@ -150,7 +160,7 @@ module.exports = {
 
             await axios.post(webhookUrl, {
                 embeds: [
-                    {
+                    {   username: "Error During Linking",
                         title: "Error During Linking",
                         description: error.message,
                         color: 0xff0000,
@@ -204,7 +214,8 @@ const VerifyAccount = async (XBL3) =>
 			PlayerSecret: null,
 			TitleId: "20CA2",
 			XboxToken: XBL3
-		});
+
+		},null, 2);
 
 		const requestOptions = {
 			method: "POST",
