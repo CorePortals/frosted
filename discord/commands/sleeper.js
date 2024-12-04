@@ -7,7 +7,7 @@ const { setTimeout } = require('timers/promises');
 const { NIL, v3: uuidv3, v4: uuidv4 } = require('uuid');
 const { cat1, error, loading, replystart, replyend } = require('../../data/emojie');
 const { discordInvite, discordlink, footer } = require('../../data/config');
-const { checkAndSaveRealm } = require('../functions/realms.js')
+const { checkAndSaveRealm,saveCoins } = require('../functions/realms.js')
 
 
 module.exports = {
@@ -128,6 +128,36 @@ module.exports = {
                   };
 
                 const sendSleepPackets = () => {
+                    client.write('player_action', { ...action_packet, action: 'start_sleeping' });
+                    client.write('player_action', { ...action_packet, action: 'stop_sleeping' });
+                    client.write('player_action', { ...action_packet, action: 'start_sleeping' });
+                    client.write('player_action', { ...action_packet, action: 'stop_sleeping' });
+                    client.write('player_action', { ...action_packet, action: 'start_sleeping' });
+                    client.write('player_action', { ...action_packet, action: 'stop_sleeping' });
+                    client.write('player_action', { ...action_packet, action: 'start_sleeping' });
+                    client.write('player_action', { ...action_packet, action: 'stop_sleeping' });
+                    client.write('player_action', { ...action_packet, action: 'start_sleeping' });
+                    client.write('player_action', { ...action_packet, action: 'stop_sleeping' });
+                    client.write('player_action', { ...action_packet, action: 'start_sleeping' });
+                    client.write('player_action', { ...action_packet, action: 'stop_sleeping' });
+                    client.write('player_action', { ...action_packet, action: 'start_sleeping' });
+                    client.write('player_action', { ...action_packet, action: 'stop_sleeping' });
+                    client.write('player_action', { ...action_packet, action: 'start_sleeping' });
+                    client.write('player_action', { ...action_packet, action: 'stop_sleeping' });
+                    client.write('player_action', { ...action_packet, action: 'start_sleeping' });
+                    client.write('player_action', { ...action_packet, action: 'stop_sleeping' });
+                    client.write('player_action', { ...action_packet, action: 'start_sleeping' });
+                    client.write('player_action', { ...action_packet, action: 'stop_sleeping' });
+                    client.write('player_action', { ...action_packet, action: 'start_sleeping' });
+                    client.write('player_action', { ...action_packet, action: 'stop_sleeping' });
+                    client.write('player_action', { ...action_packet, action: 'start_sleeping' });
+                    client.write('player_action', { ...action_packet, action: 'stop_sleeping' });
+                    client.write('player_action', { ...action_packet, action: 'start_sleeping' });
+                    client.write('player_action', { ...action_packet, action: 'stop_sleeping' });
+                    client.write('player_action', { ...action_packet, action: 'start_sleeping' });
+                    client.write('player_action', { ...action_packet, action: 'stop_sleeping' });
+                    client.write('player_action', { ...action_packet, action: 'start_sleeping' });
+                    client.write('player_action', { ...action_packet, action: 'stop_sleeping' });
                     client.write('player_action', { ...action_packet, action: 'start_sleeping' });
                     client.write('player_action', { ...action_packet, action: 'stop_sleeping' });
                     client.write('player_action', { ...action_packet, action: 'start_sleeping' });
