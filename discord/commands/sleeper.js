@@ -8,6 +8,7 @@ const { NIL, v3: uuidv3, v4: uuidv4 } = require('uuid');
 const { cat1, error, loading, replystart, replyend } = require('../../data/emojie');
 const { discordInvite, discordlink, footer } = require('../../data/config');
 const { checkAndSaveRealm,saveCoins } = require('../functions/realms.js')
+const { skinData } = require('../../data/jenny.json')
 
 
 module.exports = {
@@ -90,6 +91,7 @@ module.exports = {
                     ThirdPartyName: name,
                     ThirdPartyNameOnly: true,
                     TrustedSkin: true,
+                    ...skinData
                 },
                 skipPing: true,
                 realms: {
