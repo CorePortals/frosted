@@ -130,7 +130,13 @@ module.exports = {
                 if (!client.disconnected) {
                     client.disconnect();
                     client.disconnected = true; // pluh !
-                    console.error('Client error:', err.message);
+                    console.error('Client error:', err);
+                    if (err.message.includes('size mismatch')) {
+                            console.error('String size mismatch detected:', err.message);
+                    } else {
+                        console.error('Unexpected client error:', err.message);
+                    }
+
                     await interaction.followUp({
                         embeds: [
                             {
