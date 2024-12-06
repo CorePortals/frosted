@@ -42,7 +42,7 @@ module.exports = {
 
             if (!realmInfo) {
                 try{
-
+                await interaction.deferReply({ ephemeral: false });
                 const embed = new EmbedBuilder()
                 .setTitle('Error')
                 .setDescription(`Invalid ID given. Please run /realm dump or /Club ID .`)
