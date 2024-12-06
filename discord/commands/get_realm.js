@@ -17,6 +17,7 @@ module.exports = {
                 .setMaxValue(3)),
 
     execute: async (interaction) => {
+        await interaction.deferReply({ ephemeral: false });
         const userId = interaction.user.id;
         const requestedCount = interaction.options.getInteger('number');
 
