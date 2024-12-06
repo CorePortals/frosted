@@ -24,7 +24,7 @@ module.exports = {
         .setDescription('Restart the server. (Admins only)'),
 
     execute: async (interaction) => {
-        // Ensure the admin data is loaded before continuing
+await interaction.deferReply({ ephemeral: false };
         await loadAdminUsers();
 
         if (!adminUsers.has(interaction.user.id)) {
