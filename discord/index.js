@@ -8,7 +8,6 @@ const os = require('os');
 const osUtils = require('os-utils');
 const { banweebhook, join_leave_weebhook, command_log } = require('../data/config.js')
 
-// Define paths for configuration files
 const statusPath = path.join(__dirname, "..", "data", "status.json");
 const adminsPath = path.join(__dirname, "..", "data", "admin.json");
 const banDatabasePath = path.join(__dirname, "..", "data", "ban.json");
@@ -555,6 +554,9 @@ module.exports = {
                 try {
                     await command.execute(interaction, status, config);
                 } catch (error) {
+                    if (error instanceof DiscordAPIError && error.code === 10062) {
+                        console.error("[ERROR] Unknown interaction error for ", interaction.user.tag );
+                    }
                     console.error("[ERROR] Error executing command:", error);
                     handleDiscordAPIError(error, interaction); // Error handling 
                 }
@@ -638,7 +640,8 @@ module.exports = {
                  '1150858705823334431', // TSL
                  '1279212131165667450',// obaqz
                  '1250041939529568297',// Raks
-                 '837826878223548436'// Dusty
+                 '837826878223548436',// Dusty
+                "1307775273131049082"//raks alt
                 ];
 
             if (coolppl.includes(message.author.id)) {
