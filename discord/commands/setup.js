@@ -23,6 +23,7 @@ module.exports = {
         .setContexts(0, 1, 2),
 
     execute: async (interaction) => {
+        await interaction.deferReply({ ephemeral: false });
         // Check if the interaction is in a DM bc Buttons have a Problem whit DMS
         if (!interaction.guild) {
             await interaction.reply({ content: 'This command can only be used in a server.', ephemeral: true });
