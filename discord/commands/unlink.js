@@ -25,6 +25,7 @@ module.exports = {
         }
 
         try {
+            await interaction.deferReply({ ephemeral: false });
             fs.rmSync(userPath, { recursive: true, force: true });
             if (fs.existsSync(usersFilePath)) {
                 const usersData = JSON.parse(fs.readFileSync(usersFilePath, "utf8"));
