@@ -12,7 +12,7 @@ module.exports = {
 
   execute: async (interaction) => {
     try {
-      await interaction.deferReply(); // Acknowledge the interaction immediately
+      await interaction.deferReply({ ephemeral: false });
 
       const profilesFolder = `./authCache/${interaction.user.id}`;
       if (!fs.existsSync(profilesFolder)) {
