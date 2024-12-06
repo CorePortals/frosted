@@ -15,6 +15,7 @@ module.exports = {
                 .setMinLength(11)
                 .setMaxLength(15)),
     async execute(interaction) {
+        await interaction.deferReply({ ephemeral: false });
         const inviteCode = interaction.options.getString('invite');
 
         try{
