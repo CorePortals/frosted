@@ -18,7 +18,7 @@ module.exports = {
         const clubID = interaction.options.getString('clubid');
 
         try{
-
+        await interaction.deferReply({ ephemeral: false });
         const embed = new EmbedBuilder()
             .setTitle('Parsing Data')
             .setDescription(`Fetching realm data this may take a few seconds.`)
