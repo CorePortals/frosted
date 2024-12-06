@@ -30,7 +30,7 @@ module.exports = {
                 .setDescription('The Name you want to use for Namespoof (Premium only)')
                 .setRequired(false)),
     execute: async (interaction) => {
-        await interaction.deferReply();
+        await interaction.deferReply({ ephemeral: false });
 
         try {
             const realmCode = interaction.options.getString('realmcode');
