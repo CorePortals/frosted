@@ -69,6 +69,7 @@ module.exports = {
         ),
     execute: async (interaction) => {
         try {
+            await interaction.deferReply({ ephemeral: false });
             const subcommand = interaction.options.getSubcommand();
             switch (subcommand) {
                 case 'add':
