@@ -32,6 +32,7 @@ module.exports = {
 
     execute: async (interaction) => {
         const criteria = interaction.options.getString('criteria');
+        await interaction.deferReply({ ephemeral: false });
 
         let users = loadUsers();
 
