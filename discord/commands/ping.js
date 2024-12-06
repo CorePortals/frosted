@@ -8,6 +8,7 @@ module.exports = {
     .setContexts(0, 1, 2),
 
   execute: async (interaction) => {
+    await interaction.deferReply({ ephemeral: false });
     const ping = Date.now() - interaction.createdTimestamp;
     const apiPing = Math.round(interaction.client.ws.ping);
 
