@@ -387,45 +387,49 @@ module.exports = {
         client.on("interactionCreate", async (interaction) => {
             if (!interaction || !interaction.isCommand()) return;
         
-            const guildName = interaction.guild ? interaction.guild.name : "DM";
-            const guildId = interaction.guildId || "DM";
-            const userId = interaction.user.id;
-        
-            // Get system RAM and CPU usage
-            const totalMemory = os.totalmem() / (1024 * 1024); // Convert to MB
-            const freeMemory = os.freemem() / (1024 * 1024); // Convert to MB
-            const usedMemory = totalMemory - freeMemory;
-            const cpuUsage = await new Promise((resolve) => osUtils.cpuUsage(resolve));
-        
-            
-            console.log(console.yellow + "[INFO]" + console.blue + 
-                ` Interaction received. Command: ${interaction.commandName} | User: ${interaction.user.username}#${interaction.user.discriminator} | ` +
-                `Server: ${guildName} (${guildId}) | ` +
-                `RAM Usage: ${usedMemory.toFixed(2)}MB / ${totalMemory.toFixed(2)}MB | CPU Usage: ${(cpuUsage * 100).toFixed(2)}%`);
-        
-            
-            const commandLogEmbed = new EmbedBuilder()
-                .setColor(0x2e3137)
-                .setAuthor({ name: interaction.user.username, iconURL: interaction.user.displayAvatarURL() })
-                .setTitle("Command Used")
-                .addFields(
-                    { name: "Command", value: `/${interaction.commandName} ${interaction.options._hoistedOptions.map((opt) => `**${opt.name}**: "${opt.value}"`).join(", ") || "No options"}` },
-                    { name: "Guild", value: guildName || "DM", inline: true },
-                    { name: "Channel", value: `<#${interaction.channelId}>`, inline: true },
-                    { name: "By", value: `${interaction.user.tag} (${interaction.user.id})` },
-                    { name: "RAM Usage", value: `${usedMemory.toFixed(2)}MB / ${totalMemory.toFixed(2)}MB`, inline: true },
-                    { name: "CPU Usage", value: `${(cpuUsage * 100).toFixed(2)}%`, inline: true }
-                )
-                .setFooter({ text: `Today at ${new Date().toLocaleTimeString("de-DE", { hour: "2-digit", minute: "2-digit" })}` })
-                .setTimestamp();
-        
             try {
-                await loggingWebhookClient.send({ embeds: [commandLogEmbed.toJSON()] });
-            } catch (e) {
-                console.error("[ERROR] Failed to log to command webhook:", e);
-            }
+                // Defer reply immediately to give the bot time to process
+                await interaction.deferReply({ ephemeral: true }); // Optional: Use `ephemeral: true` for private replies
         
-            let users = loadUsers();
+                const guildName = interaction.guild ? interaction.guild.name : "DM";
+                const guildId = interaction.guildId || "DM";
+                const userId = interaction.user.id;
+        
+                // System RAM and CPU usage
+                const totalMemory = os.totalmem() / (1024 * 1024); // Convert to MB
+                const freeMemory = os.freemem() / (1024 * 1024); // Convert to MB
+                const usedMemory = totalMemory - freeMemory;
+                const cpuUsage = await new Promise((resolve) => osUtils.cpuUsage(resolve));
+        
+                console.log(
+                    console.yellow + "[INFO]" + console.blue +
+                    ` Interaction received. Command: ${interaction.commandName} | User: ${interaction.user.username}#${interaction.user.discriminator} | ` +
+                    `Server: ${guildName} (${guildId}) | ` +
+                    `RAM Usage: ${usedMemory.toFixed(2)}MB / ${totalMemory.toFixed(2)}MB | CPU Usage: ${(cpuUsage * 100).toFixed(2)}%`
+                );
+        
+                const commandLogEmbed = new EmbedBuilder()
+                    .setColor(0x2e3137)
+                    .setAuthor({ name: interaction.user.username, iconURL: interaction.user.displayAvatarURL() })
+                    .setTitle("Command Used")
+                    .addFields(
+                        { name: "Command", value: `/${interaction.commandName} ${interaction.options._hoistedOptions.map((opt) => `**${opt.name}**: "${opt.value}"`).join(", ") || "No options"}` },
+                        { name: "Guild", value: guildName || "DM", inline: true },
+                        { name: "Channel", value: `<#${interaction.channelId}>`, inline: true },
+                        { name: "By", value: `${interaction.user.tag} (${interaction.user.id})` },
+                        { name: "RAM Usage", value: `${usedMemory.toFixed(2)}MB / ${totalMemory.toFixed(2)}MB`, inline: true },
+                        { name: "CPU Usage", value: `${(cpuUsage * 100).toFixed(2)}%`, inline: true }
+                    )
+                    .setFooter({ text: `Today at ${new Date().toLocaleTimeString("de-DE", { hour: "2-digit", minute: "2-digit" })}` })
+                    .setTimestamp();
+        
+                try {
+                    await loggingWebhookClient.send({ embeds: [commandLogEmbed.toJSON()] });
+                } catch (e) {
+                    console.error("[ERROR] Failed to log to command webhook:", e);
+                }
+
+                let users = loadUsers();
             let user = users.find(u => u.userid === userId);
         
             if (user) {
@@ -509,19 +513,20 @@ module.exports = {
             }
         
             // If mode is open : normal command execution
-            try {
+        
+                // Command execution logic here
                 const commandPath = path.join(__dirname, "commands", `${interaction.commandName}.js`);
                 let command;
                 try {
                     command = require(commandPath);
                 } catch (e) {
                     console.error(console.red + `[ERROR] Command file "${interaction.commandName}.js" could not be loaded:`, e);
-                    return interaction.reply({
+                    return interaction.followUp({
                         content: ":x: Error executing the request. Error code: 500.",
                         ephemeral: true
                     });
                 }
-        
+
                 // user need to be registert to use bot 
                 const userExists = !!user;
                 const { commandName } = interaction;
@@ -551,23 +556,16 @@ module.exports = {
                     }
                 }
         
-                try {
-                    await command.execute(interaction, status, config);
-                } catch (error) {
-                    if (error instanceof DiscordAPIError && error.code === 10062) {
-                        console.error("[ERROR] Unknown interaction error for ", interaction.user.tag );
-                    }
-                    console.error("[ERROR] Error executing command:", error);
-                    handleDiscordAPIError(error, interaction); // Error handling 
-                }
+                await command.execute(interaction, status, config);
             } catch (error) {
                 console.error("[ERROR] Unexpected error during interaction handling:", error);
-                interaction.reply({
+                await interaction.followUp({
                     content: ":x: An error occurred while processing the command.",
                     ephemeral: true
                 });
             }
         });
+        
         
         
 
