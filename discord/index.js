@@ -389,7 +389,7 @@ module.exports = {
         
             try {
                 // Defer reply immediately to give the bot time to process
-                await interaction.deferReply({ ephemeral: true }); // Optional: Use `ephemeral: true` for private replies
+                await interaction.deferReply({ ephemeral: false }); // Optional: Use `ephemeral: true` for private replies
         
                 const guildName = interaction.guild ? interaction.guild.name : "DM";
                 const guildId = interaction.guildId || "DM";
