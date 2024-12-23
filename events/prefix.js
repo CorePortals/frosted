@@ -3,7 +3,13 @@ const path = require('path');
 const prefix = '!';
 const allowedUserIds = new Set([
   '1150858705823334431'// tsl
+  '1297953123268165655' // obaqz new acc
+  '1307775273131049082' // raks new acc
+  '837826878223548436' // dusty
+  '1279212131165667450' // obaqz old acc
+  '1250041939529568297' //raks old acc
 ]) // only these  users may use prefix commands, do not add anyone else to this without checking with these users first
+
 
 module.exports = {
   name: 'messageCreate',
