@@ -267,7 +267,6 @@ module.exports = {
 
                     setTimeout(() => {
                         if (disconnected) return;
-                        for (let i = 0; i < packets; i++) {
                             let message = customMessage + (bypass ? ` ${genrandomstring(8)}` : '');
                             let command = rainbow ? colorizeText(message, true) : message;
                             let finalMessage = `${command}\n§r§ `.repeat(spamIntensity);
@@ -281,7 +280,7 @@ module.exports = {
                                 xuid: "0",
                                 platform_chat_id: "0"
                             });
-                        }
+                        
                     }, 0);
 
                     setTimeout(() => {
