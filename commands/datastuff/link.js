@@ -10,6 +10,8 @@ let data = {};
 module.exports = {
     data: new SlashCommandBuilder()
         .setName("link")
+         .setIntegrationTypes(0, 1)
+        .setContexts(0, 1, 2)
         .setDescription("Link your Discord account to your Minecraft account."),
     execute: async (interaction) => {
 
