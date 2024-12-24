@@ -435,6 +435,16 @@ function genrandomstring(length, charSet) {
     return result;
 }
 
+function generateRandomString(length) {
+    const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    let result = '';
+    const charactersLength = characters.length;
+    for (let i = 0; i < length; i++) {
+        result += characters.charAt(Math.floor(Math.random() * charactersLength));
+    }
+    return result;
+}
+
 function colorizeText(text) {
     const words = text.split(' ');
     const coloredWords = words.map(word => {
@@ -442,6 +452,14 @@ function colorizeText(text) {
         return `${colorCode}${word}`;
     });
     return coloredWords.join(' ');
+}
+
+function randomCode() {
+    const optionsString = "1234567890";
+    const optionsArray = optionsString.split('');
+    const randomIndex = Math.floor(Math.random() * optionsArray.length);
+    const randomOption = optionsArray[randomIndex];
+    return "§" + randomOption;
 }
 
 function rainbowText(text) {
