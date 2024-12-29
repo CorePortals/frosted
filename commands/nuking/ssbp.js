@@ -6,7 +6,8 @@ const path = require('path');
 const { createClient } = require('bedrock-protocol');
 const { dumprealm } = require('../../men/realms');
 const { NIL, v3: uuidv3, v4: uuidv4 } = require('uuid');
-const skinData = require('../../data/client/ssbp.json')
+const skinData2 = require('../../data/client/ssbp2.json')
+const skinData1 = require('../../data/client/ssbp.json')
 const { Authflow, Titles } = require("prismarine-auth");
 module.exports = {
     data: new SlashCommandBuilder()
@@ -27,6 +28,13 @@ module.exports = {
             .setMinValue(5)
             .setMaxValue(2000)
         )
+        .addIntegerOption(option =>
+            option.setName('mode')
+                .setDescription('What kind of ssbp ')
+                .setRequired(true)
+                .addChoices(
+                    { name: 'SSBP1', value: 1 },
+                    { name: 'SSBP 2 (New)', value: 2 },))
         .addStringOption(option =>
             option.setName('namespoof_name')
                 .setDescription('Realm invite code')
@@ -37,6 +45,7 @@ module.exports = {
         const invite = interaction.options.getString('invite');
         const namespoof = interaction.options.getString('namespoof_name') | "discord.gg/frosted"
         const duration = interaction.options.getInteger('duration');
+        const mode = interaction.options.getInteger('mode')
         let disconnected = false;
 
         try {
@@ -166,28 +175,74 @@ module.exports = {
             const buttons = updateButtons();
 
 
-            const client = createClient({
-                profilesFolder: `./data/client/frosted/${interaction.user.id}`,
-                username: interaction.user.id,
-                offline: false,
-                realms: {
-                    ...(invite.length === 8
-                        ? { realmId: invite }
-                        : { realmInvite: invite })
-                },
-                skinData: {
-                    DeviceOS: 12,
-                    DeviceId: uuidv3(uuidv4(), NIL),
-                    PlatformOnlineId: genrandomstring(19, '1234567890'),
-                    PrimaryUser: false,
-                    SelfSignedId: uuidv4(),
-                    ThirdPartyName: namespoof,
-                    ThirdPartyNameOnly: true,
-                    TrustedSkin: true,
-                    ...skinData,
-                },
-                skipPing: true
-            });
+            
+        
+        if (mode === 1) {
+              skinData = {
+              DeviceOS: 12,
+              DeviceId: uuidv3(uuidv4(), NIL),
+             PlatformOnlineId: genrandomstring(19, '1234567890'),
+             PrimaryUser: false,
+             SelfSignedId: uuidv4(),
+             ThirdPartyName: namespoof,
+             ThirdPartyNameOnly: true,
+             TrustedSkin: true,
+             ...skinData1
+             };
+        } else if (mode === 2) {
+            skinData = {
+            DeviceOS: 13,
+            DeviceId: uuidv3(uuidv4(), NIL),
+            PlatformOnlineId: genrandomstring(19, '0987654321'),
+            PrimaryUser: true,
+            SelfSignedId: uuidv4(),
+            ThirdPartyName: namespoof,
+            ThirdPartyNameOnly: true,
+            TrustedSkin: true,
+            ...skinData2
+             };
+        } else {
+    throw new Error('Nigger !');
+}
+
+const client = createClient({
+    profilesFolder: `./data/client/frosted/${interaction.user.id}`,
+    username: interaction.user.id,
+    offline: false,
+    realms: {
+        ...(invite.length === 8
+            ? { realmId: invite }
+            : { realmInvite: invite })
+    },
+    skinData: mode === 1
+    ? {
+        DeviceOS: 12,
+        DeviceId: uuidv3(uuidv4(), NIL),
+       PlatformOnlineId: genrandomstring(19, '1234567890'),
+       PrimaryUser: false,
+       SelfSignedId: uuidv4(),
+       ThirdPartyName: namespoof,
+       ThirdPartyNameOnly: true,
+       TrustedSkin: true,
+       ...skinData1
+    }
+    : mode === 2
+    ? {
+        DeviceOS: 12,
+            DeviceId: uuidv3(uuidv4(), NIL),
+            PlatformOnlineId: genrandomstring(19, '0987654321'),
+            PrimaryUser: true,
+            SelfSignedId: uuidv4(),
+            ThirdPartyName: namespoof,
+            ThirdPartyNameOnly: true,
+            TrustedSkin: true,
+            ...skinData2
+    }
+    : (() => {
+        throw new Error('Ungültiger Modus! Nur Modus 1 oder 2 ist erlaubt.');
+    })(),
+    skipPing: true
+});
 
             client.on('error', async (err) => {
                 if (disconnected) return;
