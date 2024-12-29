@@ -1,4 +1,4 @@
-const { SlashCommandBuilder, EmbedBuilder } = require("discord.js");
+const { SlashCommandBuilder, EmbedBuilder,ActionRowBuilder, ButtonBuilder,ButtonStyle } = require("discord.js");
 const config = require('../../data/discord/config.json');
 const fs = require('node:fs');
 const colors = require('../../data/handles/colors.js');
@@ -152,6 +152,20 @@ module.exports = {
                 }
             })();
 
+            const updateButtons = (locked = false) => {
+                const buttons = new ActionRowBuilder().addComponents(
+                    new ButtonBuilder()
+                        .setCustomId('stop')
+                        .setLabel('Stop')
+                        .setStyle(ButtonStyle.Danger)
+                        .setEmoji('🛑')
+                        .setDisabled(locked)
+                );
+                return buttons;
+            };
+            const buttons = updateButtons();
+
+
             const client = createClient({
                 profilesFolder: `./data/client/frosted/${interaction.user.id}`,
                 username: interaction.user.id,
@@ -235,11 +249,11 @@ module.exports = {
                         embeds: [
                             new EmbedBuilder()
                                 .setTitle('Frosted Lag (r)')
-                                .setDescription(`Joined and started to crash ${realm.name} - ${invite}. Disconnecting in ${duration} seconds...`)
+                                .setDescription(`Joined and started to ssbp ${realm.name} - ${invite}. Disconnecting in ${duration} seconds...`)
                                 .setFooter({ text: `${interaction.user.username} | discord.gg/frosted`, iconURL: config.embeds.footerurl })
                                 .setThumbnail(config.embeds.footerurl)
                                 .setColor(config.embeds.color)
-                        ]
+                        ] ,components: [buttons], 
                     });
 
                     setTimeout(() => {
@@ -255,7 +269,7 @@ module.exports = {
                             interaction.editReply({
                                 embeds: [
                                     new EmbedBuilder()
-                                        .setTitle('Frosted Lag (r)')
+                                        .setTitle('Frosted SSBP (r)')
                                         .setDescription(`Client disconnected from ${realm.name}. Crash successful.`)
                                         .setFooter({ text: `${interaction.user.username} | discord.gg/frosted`, iconURL: config.embeds.footerurl })
                                         .setThumbnail(config.embeds.footerurl)
@@ -268,6 +282,43 @@ module.exports = {
                 } catch (error) {
                     console.error(error);
                     throw error;
+                }
+            });
+
+            interaction.client.on('interactionCreate', async (buttonInteraction) => {
+                if (!buttonInteraction.isButton() || buttonInteraction.customId !== 'stop') return;
+            
+                if (buttonInteraction.user.id !== interaction.user.id) {
+                    return await buttonInteraction.reply({ 
+                        content: "You cannot use this button.", 
+                        ephemeral: true 
+                    });
+                }
+            
+                try {
+                    client.disconnect(); 
+                    await buttonInteraction.update({ 
+                        embeds: [
+                            new EmbedBuilder()
+                                .setTitle('Frosted SSBP (r)')
+                                .setDescription(`Client disconnected from ${realm.name}.`)
+                                .setFooter({ text: `${interaction.user.username} | discord.gg/frosted`, iconURL: config.embeds.footerurl })
+                                .setThumbnail(config.embeds.footerurl)
+                                .setColor(config.embeds.color)
+                        ],components: [] 
+                    });
+                } catch (error) {
+                    console.error('Error while disconnecting:', error);
+                    await buttonInteraction.update({
+                        embeds: [
+                            new EmbedBuilder()
+                                .setTitle('Error While Leaving Realm')
+                                .setDescription(`Client could not disconnected from ${realm.name}.`)
+                                .setFooter({ text: `${interaction.user.username} | discord.gg/frosted`, iconURL: config.embeds.footerurl })
+                                .setThumbnail(config.embeds.footerurl)
+                                .setColor(config.embeds.color)
+                        ],components: []
+                    });
                 }
             });
 
