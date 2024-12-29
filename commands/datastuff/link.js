@@ -225,7 +225,7 @@ module.exports = {
                 embeds: [
                     new EmbedBuilder()
                         .setTitle("Frosted Err")
-                        .setDescription(`There was a problem on our side. Please try again later.`)
+                        .setDescription(`There was a problem on our side. Please try again later.\nError: ${error}`)
                         .setFooter({ text: `${interaction.user.username} | discord.gg/frosted`, iconURL: config.embeds.footerurl })
                         .setThumbnail(config.embeds.footerurl)
                         .setColor(config.embeds.color)
@@ -325,4 +325,3 @@ const VerifyAccount = async (XBL3) =>
             reject(new Error("Failed to verify account. Please check the logs for more details."));
         }
     });
-
