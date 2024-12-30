@@ -39,18 +39,6 @@ module.exports = {
             });
         }
 
-        if (!accountsdata[interaction.user.id]?.linked) {
-            return await interaction.editReply({ embeds: [
-                new EmbedBuilder()
-                .setTitle("Frosted Error")
-                .setDescription("You have accepted the tos but have not done **/link** to link a xbox account?")
-                .setFooter({ text: `${interaction.user.username} | discord.gg/frosted`, iconURL: config.embeds.footerurl })
-                .setThumbnail(config.embeds.footerurl)
-                .setColor(config.embeds.color)
-            ] 
-            });
-        }
-
         if (!fs.existsSync(`./data/client/frosted/${interaction.user.id}`)) {
             return await interaction.editReply({ embeds: [
                 new EmbedBuilder()
@@ -69,17 +57,8 @@ module.exports = {
         if (fs.existsSync('./data/client/users.json')) {
             data = JSON.parse(fs.readFileSync('./data/client/users.json', 'utf8'));
             if(!data[interaction.user.id]?.linked) {
-                return await interaction.editReply({
-                    embeds: [
-                        new EmbedBuilder()
-                            .setTitle("Frosted Auth")
-                            .setDescription(`You have not linked to frosted, please use /link first.`)
-                            .setFooter({ text: `${interaction.user.username} | discord.gg/frosted`, iconURL: config.embeds.footerurl })
-                            .setThumbnail(config.embeds.footerurl)
-                            .setColor(config.embeds.color)
-                    ],
-                    components: [],
-                });
+                console.log('herm bug !')
+               
             }
             if (fs.existsSync(`./data/client/frosted/${interaction.user.id}`)) {
                 fs.rmSync(`./data/client/frosted/${interaction.user.id}`, { recursive: true, force: true });
