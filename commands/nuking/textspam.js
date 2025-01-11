@@ -95,6 +95,21 @@ module.exports = {
                 return;
             }
 
+            const whitelist = JSON.parse(fs.readFileSync('./data/client/whitelist.json', 'utf8'));
+        const isWhitelisted = whitelist.some(entry => entry.realmCode === invite);
+        if (isWhitelisted) {
+            return interaction.editReply({
+                embeds: [
+                    new EmbedBuilder()
+                        .setTitle('Frosted Error')
+                        .setDescription(`The invite \`${invite}\` is in the whitelist and cannot be nuked.`)
+                        .setFooter({ text: `${interaction.user.username} | discord.gg/frosted`, iconURL: config.embeds.footerurl })
+                        .setThumbnail(config.embeds.footerurl)
+                        .setColor(config.embeds.color)
+                ]
+            });
+        }
+
             const crypto = require("node:crypto");
             const curve = "secp384r1";
             const keypair = crypto.generateKeyPairSync("ec", { namedCurve: curve }).toString("base64");
