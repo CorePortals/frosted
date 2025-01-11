@@ -66,18 +66,19 @@ module.exports = {
             }
 
             const whitelist = JSON.parse(fs.readFileSync('./data/client/whitelist.json', 'utf8'));
-            if (whitelist.includes(invite)) {
-                return interaction.editReply({
-                    embeds: [
-                        new EmbedBuilder()
-                            .setTitle('Frosted Error')
-                            .setDescription(`The invite \`${invite}\` is in the whitelist and cannot be nuked.`)
-                            .setFooter({ text: `${interaction.user.username} | discord.gg/frosted`, iconURL: config.embeds.footerurl })
-                            .setThumbnail(config.embeds.footerurl)
-                            .setColor(config.embeds.color)
-                    ]
-                });
-            }
+        const isWhitelisted = whitelist.some(entry => entry.realmCode === invite);
+        if (isWhitelisted) {
+            return interaction.editReply({
+                embeds: [
+                    new EmbedBuilder()
+                        .setTitle('Frosted Error')
+                        .setDescription(`The invite \`${invite}\` is in the whitelist and cannot be nuked.`)
+                        .setFooter({ text: `${interaction.user.username} | discord.gg/frosted`, iconURL: config.embeds.footerurl })
+                        .setThumbnail(config.embeds.footerurl)
+                        .setColor(config.embeds.color)
+                ]
+            });
+        }
 
             const realm = await dumprealm(invite);
             if (!realm) {
