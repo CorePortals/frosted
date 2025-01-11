@@ -1,9 +1,10 @@
 {
     "main" : {
-        "token" : "MTMxMDY5MjAwODEyMTIwODkxMg.Gw59Py.mWb7LhW0RDAhXk6e9PFYFiX-pgZLhA1Te2zUDM",
-        "id" : "1310692008121208912"
+        "token" : "MTMxMDcwODM1MDE1MzEzMDA1NA.GtIm0y.gzwCCXm6hgbIxyr-KygxMO5zSfTBA35vTvFZIU",
+        "id" : "1310708350153130054"
     },
     "logging" : {
+        "roleupdates": "1327447710571434064",
         "guildcreate" : "1300946974836658266",
         "guildremove" : "1300946974836658266",
         "commandused": "1310689359531475076",
@@ -23,5 +24,7 @@
         "color": "#89CFF0",
         "footer": "frosted | discord.gg/frosted",
         "footerurl": "https://cdn.discordapp.com/attachments/1312133454791573574/1312137253396549813/fm0uKV3.jpg?ex=674b668b&is=674a150b&hm=bd6c95914e9548c2e0f277b6a8297f350cb60213e283d305ebefe0b2e9d7e8a0&"
-    }
+    },
+    "targetServerId": "1296633003304554536",
+    "targetRoleId": "1305697481794781215"
 }
