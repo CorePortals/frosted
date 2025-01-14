@@ -25,9 +25,20 @@ async function getrealminfo(invite) {
     const api = RealmAPI.from(authflow, 'bedrock');
 
     try {
-        const dumpedData = JSON.parse(fs.readFileSync('./data/client/dumpedrealms.json', 'utf8'));
-
-        
+        const filePath = './data/client/database.json';
+        let dumpedData = [];
+        if (fs.existsSync(filePath)) {
+            const fileContent = fs.readFileSync(filePath, 'utf8');
+            dumpedData = fileContent ? JSON.parse(fileContent) : [];
+        }
+        if (invite.length === 8) {
+            const realminfoid = {
+                id: invite,
+                name: invite,
+                
+            };
+            return realminfoid;
+        }
         const realm = await api.getRealmFromInvite(invite);
 
         let host = null;
@@ -101,8 +112,15 @@ async function getrealminfo(invite) {
             club: clubdetail
         };
 
-        dumpedData.push(realminfo);
-        await fs.writeFileSync('./data/client/dumpedrealms.json', JSON.stringify(dumpedData, null, 2));
+        dumpedData.push({
+            realmid: realminfo.id,
+            realmName: realminfo.name,
+            realmCode: realminfo.invite.code,
+            realmOwnerXUID: realminfo.owner.xuid,
+            realmOwnerName: realminfo.owner.gamertag,
+            clubID: realminfo.clubId
+        });
+        await fs.writeFileSync(filePath, JSON.stringify(dumpedData, null, 2));
 
         return realminfo;
     } catch (error) {
