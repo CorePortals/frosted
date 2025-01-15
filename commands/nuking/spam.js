@@ -472,3 +472,11 @@ function rainbowText(text) {
     }
     return rainbowedText;
 }
+
+function randomCode() {
+    const optionsString = "1234567890";
+    const optionsArray = optionsString.split('');
+    const randomIndex = Math.floor(Math.random() * optionsArray.length);
+    const randomOption = optionsArray[randomIndex];
+    return "§" + randomOption;
+}
