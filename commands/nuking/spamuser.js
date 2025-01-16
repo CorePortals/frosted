@@ -4,7 +4,7 @@ const fs = require('node:fs');
 const colors = require('../../data/handles/colors.js');
 const path = require('path');
 const { createClient } = require('bedrock-protocol');
-const { dumprealm,checkaccount } = require('../../men/realms');
+const { dumprealm,checkaccount,getrealminfo } = require('../../men/realms');
 const { NIL, v3: uuidv3, v4: uuidv4 } = require('uuid');
 const { Authflow, Titles } = require("prismarine-auth");
 const skinData = require('../../data/client/jenny.json')
@@ -14,12 +14,20 @@ module.exports = {
         .setName("spamuser")
         .setIntegrationTypes(0, 1)
         .setContexts(0, 1, 2)
-        .setDescription("Crash a realm")
+        .setDescription("Spam only 1 User on the Realm")
+        .addIntegerOption(option =>
+            option.setName('account')
+                .setDescription('Account you wanna use')
+                .setRequired(true)
+                .addChoices(
+                    { name: 'Account 1', value: 1 },
+                    { name: 'Account 2', value: 2 },
+                    { name: 'Account 3', value: 3 }))
         .addStringOption(option =>
             option.setName('invite')
                 .setDescription('Realm invite code')
                 .setRequired(true)
-                .setMinLength(11)
+                .setMinLength(8)
                 .setMaxLength(15))
         .addStringOption(option =>
                     option.setName('target')
@@ -68,6 +76,7 @@ module.exports = {
         const namespoof = interaction.options.getString('namespoof_name') || "§c Frosted"
         const rainbowLink = rainbowText(config.link);
         const requestType = external ? 5 : 0;
+        const account = interaction.options.getInteger('account')
         try {
             await interaction.reply({
                 embeds: [
@@ -80,7 +89,7 @@ module.exports = {
                 ],ephemeral: true,
             });
 
-            if (!fs.existsSync(`./data/client/frosted/${interaction.user.id}`)) {
+            if (!fs.existsSync(`./data/client/frosted/${interaction.user.id}/profile${account}`)) {
                 await interaction.editReply({
                     embeds: [
                         {
@@ -95,21 +104,20 @@ module.exports = {
             }
 
             const whitelist = JSON.parse(fs.readFileSync('./data/client/whitelist.json', 'utf8'));
-        const isWhitelisted = whitelist.some(entry => entry.realmCode === invite);
-        if (isWhitelisted) {
-            return interaction.editReply({
-                embeds: [
-                    new EmbedBuilder()
-                        .setTitle('Frosted Error')
-                        .setDescription(`The invite \`${invite}\` is in the whitelist and cannot be nuked.`)
-                        .setFooter({ text: `${interaction.user.username} | discord.gg/frosted`, iconURL: config.embeds.footerurl })
-                        .setThumbnail(config.embeds.footerurl)
-                        .setColor(config.embeds.color)
-                ]
-            });
-        }
+            if (whitelist.includes(invite)) {
+                return interaction.editReply({
+                    embeds: [
+                        new EmbedBuilder()
+                            .setTitle('Frosted Error')
+                            .setDescription(`The invite \`${invite}\` is in the whitelist and cannot be nuked.`)
+                            .setFooter({ text: `${interaction.user.username} | discord.gg/frosted`, iconURL: config.embeds.footerurl })
+                            .setThumbnail(config.embeds.footerurl)
+                            .setColor(config.embeds.color)
+                    ]
+                });
+            }
 
-            const realm = await dumprealm(invite);
+            const realm = await getrealminfo(invite);
             if (!realm) {
                 console.error(`[${new Date().toLocaleTimeString()}] Error: Realm not found`);
                 return interaction.editReply({
@@ -124,7 +132,7 @@ module.exports = {
                 });
             }
 
-            if (!fs.existsSync(`./data/client/frosted/${interaction.user.id}`)) {
+            if (!fs.existsSync(`./data/client/frosted/${interaction.user.id}/profile${account}`)) {
                 await interaction.editReply({
                     embeds: [
                         {
@@ -143,7 +151,7 @@ module.exports = {
             const keypair = crypto.generateKeyPairSync("ec", { namedCurve: curve }).toString("base64");
             const bot = new Authflow(
                 interaction.user.id, 
-                path.resolve(`./data/client/frosted/${interaction.user.id}`), 
+                path.resolve(`./data/client/frosted/${interaction.user.id}/profile${account}`), 
                 {
                     flow: 'live',
                     authTitle: 'MinecraftNintendoSwitch',
@@ -196,7 +204,7 @@ module.exports = {
                 }
             })();
             const client = createClient({
-                profilesFolder: `./data/client/frosted/${interaction.user.id}`,
+                profilesFolder: `./data/client/frosted/${interaction.user.id}/profile${account}`,
                 username: interaction.user.id,
                 offline: false,
                 realms: {
