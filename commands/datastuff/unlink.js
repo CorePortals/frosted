@@ -9,9 +9,7 @@ const colors = require('../../data/handles/colors.js');
 module.exports = {
     data: new SlashCommandBuilder()
         .setName("unlink")
-        .setDescription("Delete all personal data stored by frosted.")
-        .setIntegrationTypes(0, 1)
-        .setContexts(0, 1, 2),
+        .setDescription("Delete all personal data stored by frosted."),
     
     async execute(interaction) {
         const userId = interaction.user.id;
@@ -115,4 +113,3 @@ module.exports = {
         });
     }
 };
-
