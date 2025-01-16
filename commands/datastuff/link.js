@@ -1,194 +1,174 @@
-const { SlashCommandBuilder, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require("discord.js");
+const { SlashCommandBuilder, EmbedBuilder, ActionRowBuilder, SelectMenuBuilder, ButtonBuilder, ButtonStyle } = require("discord.js");
 const { Authflow, Titles } = require("prismarine-auth");
-const crypto = require("node:crypto");
-const fs = require("node:fs");
+const fs = require("fs");
+const crypto = require("crypto");
 const axios = require("axios");
 const axl = require("app-xbox-live");
-const config = require('../../data/discord/config.json')
-const curve = "secp384r1";
-let data = {};
+const config = require('../../data/discord/config.json');
+
 module.exports = {
     data: new SlashCommandBuilder()
         .setName("link")
-        .setDescription("Link your Discord account to your Minecraft account."),
+        .setDescription("Link your Discord account to your Minecraft account.")
+        .setIntegrationTypes(0, 1)
+        .setContexts(0, 1, 2)
+        ,
     execute: async (interaction) => {
-
         try {
             if (fs.existsSync('./data/client/users.json')) {
                 let data = JSON.parse(fs.readFileSync('./data/client/users.json', 'utf8'));
-            
-                if (data[interaction.user.id].linked && fs.existsSync(`./data/client/frosted/${interaction.user.id}`)) {
-                    const unlinkbuttton = new ButtonBuilder()
+
+                if (data[interaction.user.id]?.linked) {
+                    const unlinkButton = new ButtonBuilder()
                         .setCustomId('unlink')
                         .setLabel('Unlink Account')
                         .setStyle(ButtonStyle.Danger);
-            
-                    const row = new ActionRowBuilder().addComponents(unlinkbuttton);
-            
+
+                    const row = new ActionRowBuilder().addComponents(unlinkButton);
+
                     await interaction.reply({
                         embeds: [
                             new EmbedBuilder()
                                 .setTitle("Frosted Auth")
-                                .setDescription(`Your account has already been linked to ${data[interaction.user.id].xbox.gamertag}, would you like to unlink this account?`)
+                                .setDescription(`Your account is already linked to ${data[interaction.user.id].xbox.gamertag}. Would you like to unlink it?`)
                                 .setFooter({ text: `${interaction.user.username} | discord.gg/frosted`, iconURL: interaction.user.displayAvatarURL() })
                                 .setThumbnail(config.embeds.footerurl)
-                                .setColor(config.embeds.color),
+                                .setColor(config.embeds.color)
                         ],
                         components: [row],
+                        ephemeral: true
                     });
-            
-                    interaction.client.on('interactionCreate', async (buttonInteraction) => {
-                        if (!buttonInteraction.isButton()) return;
-                        if (buttonInteraction.customId !== 'unlink') return;
-                        if (buttonInteraction.user.id !== interaction.user.id) {
-                            return await buttonInteraction.reply({ content: "You cannot use this button.", ephemeral: true }); //shouldnt happen but jst in case
-                        }
-            
-            
-                        if (fs.existsSync(`./data/client/frosted/${interaction.user.id}`)) {
-                            fs.rmSync(`./data/client/frosted/${interaction.user.id}`, { recursive: true, force: true });
-                        }
-            
-                        data[interaction.user.id].linked = false;
-            
-                        fs.writeFileSync('./data/client/users.json', JSON.stringify(data, null, 2));
-            
-                        await buttonInteraction.update({
-                            embeds: [
-                                new EmbedBuilder()
-                                    .setTitle("Frosted Auth")
-                                    .setDescription("Your account has been unlinked from frosteds database. We hope you had fun, tos status stays the same for legal reasons.")
-                                    .setFooter({ text: `${interaction.user.username} | discord.gg/frosted`, iconURL: config.embeds.footerurl })
-                                    .setThumbnail(config.embeds.footerurl)
-                                    .setColor(config.embeds.color)
-                            ],
-                            components: [],
-                        });
-                    });
-            
+
                     return;
-                } else {
-                    await interaction.reply({
+                }
+            }
+
+            const selectMenu = new SelectMenuBuilder()
+                .setCustomId('select-account')
+                .setPlaceholder('Choose an account to link')
+                .addOptions([
+                    { label: 'Account 1', value: '1' },
+                    { label: 'Account 2', value: '2' },
+                    { label: 'Account 3', value: '3' },
+                ]);
+
+            await interaction.reply({
+                embeds: [
+                    new EmbedBuilder()
+                        .setTitle("Frosted Auth")
+                        .setDescription("Please select an account to link.")
+                        .setFooter({ text: `${interaction.user.username} | discord.gg/frosted`, iconURL: config.embeds.footerurl })
+                        .setThumbnail(config.embeds.footerurl)
+                        .setColor(config.embeds.color)
+                ],
+                components: [new ActionRowBuilder().addComponents(selectMenu)],
+                ephemeral: true
+            });
+
+            // Event-Handler für das Dropdown-Menü
+            interaction.client.on('interactionCreate', async (menuInteraction) => {
+                if (!menuInteraction.isStringSelectMenu() || menuInteraction.customId !== 'select-account' || menuInteraction.user.id !== interaction.user.id) return;
+
+                const selectedAccount = menuInteraction.values[0];
+                const profilePath = `./data/client/frosted/${interaction.user.id}/profile${selectedAccount}`;
+
+                if (fs.existsSync(profilePath)) {
+                    return await menuInteraction.reply({
                         embeds: [
                             new EmbedBuilder()
                                 .setTitle("Frosted Auth")
-                                .setDescription(`You have not linked your account yet.`)
+                                .setDescription(`Account ${selectedAccount} is already linked.`)
                                 .setFooter({ text: `${interaction.user.username} | discord.gg/frosted`, iconURL: config.embeds.footerurl })
                                 .setThumbnail(config.embeds.footerurl)
                                 .setColor(config.embeds.color)
                         ],
-                        ephemeral: true,
-                        components: []
+                        ephemeral: true
                     });
                 }
-            }
-    
-            const client = new Authflow(interaction.user.id, `./data/client/frosted/${interaction.user.id}`, {
-                flow: "live",
-                authTitle: Titles.MinecraftNintendoSwitch,
-                deviceType: "Nintendo",
-                doSisuAuth: true
-            }, async (code) => {
-                try{
-                await interaction.editReply({
-                    embeds: [
-                        new EmbedBuilder()
-                            .setTitle("Frosted Auth")
-                            .setDescription(`To auth/link your xbox to your discord account visit ${code.verification_uri}?otc=${code.user_code} and enter the code \`${code.user_code}\`.`)
-                            .setFooter({ text: `${interaction.user.username} | discord.gg/frosted`, iconURL: config.embeds.footerurl })
-                            .setThumbnail(config.embeds.footerurl)
-                            .setColor(config.embeds.color)
-                    ],
-                    ephemeral: true,
-                    components: [ 
-                        new ActionRowBuilder()
-                        .addComponents(
-                            new ButtonBuilder()
-                                .setLabel('Quick Link')
-                                .setStyle(ButtonStyle.Link)
-                                .setURL(`http://microsoft.com/link?otc=${code.user_code ?? "unknown"}`)
-                        )
-                    ]
+
+                // Authflow-Instanz erstellen und Authentifizierung starten
+                const client = new Authflow(interaction.user.id, profilePath, {
+                    flow: "live",
+                    authTitle: Titles.MinecraftNintendoSwitch,
+                    deviceType: "Nintendo",
+                    doSisuAuth: true
+                }, async (code) => {
+                    await menuInteraction.update({
+                        embeds: [
+                            new EmbedBuilder()
+                                .setTitle("Frosted Auth")
+                                .setDescription(`To link your Xbox to your Discord account, visit ${code.verification_uri}?otc=${code.user_code} and enter the code \`${code.user_code}\`.`)
+                                .setFooter({ text: `${interaction.user.username} | discord.gg/frosted`, iconURL: config.embeds.footerurl })
+                                .setThumbnail(config.embeds.footerurl)
+                                .setColor(config.embeds.color)
+                        ],
+                        components: [],
+                        ephemeral: true
+                    });
                 });
-            } catch (error) {
-                console.log(error)
-            }
-            });
 
-            let expired = false;
-            await Promise.race([
-                client.getXboxToken(),
-                new Promise((resolve) =>
-                    setTimeout(() => {
-                        expired = true;
-                        resolve();
-                    }, 1000 * 60 * 5)
-                ),
-            ]);
+                let expired = false;
+                await Promise.race([
+                    client.getXboxToken(),
+                    new Promise((resolve) =>
+                        setTimeout(() => {
+                            expired = true;
+                            resolve();
+                        }, 1000 * 60 * 5)
+                    ),
+                ]);
 
-            if (expired){
-                return interaction.editReply({
-                    embeds: [
-                        new EmbedBuilder()
-                            .setTitle("Auth Timeout")
-                            .setDescription(`The authentication process has timed out. Please try again.`)
-                            .setFooter({ text: `${interaction.user.username} | discord.gg/frosted`, iconURL: config.embeds.footerurl })
-                            .setThumbnail(config.embeds.footerurl)
-                            .setColor(config.embeds.color)
-                    ],
-                    components: [],
-                });
-            }
-    
-            interaction.editReply({  // so user who is sped no link again :s
-                embeds: [
-                    new EmbedBuilder()
-                        .setTitle("Frosted Auth")
-                        .setDescription(`Signed into xbox, starting to fetch details frosted needs. This may take a few seconds be patient.`)
-                        .setFooter({ text: `${interaction.user.username} | discord.gg/frosted`, iconURL: config.embeds.footerurl })
-                        .setThumbnail(config.embeds.footerurl)
-                        .setColor(config.embeds.color)
-                        
-                ],
-                components: [],
-            })
+                if (expired) {
+                    return menuInteraction.editReply({
+                        embeds: [
+                            new EmbedBuilder()
+                                .setTitle("Auth Timeout")
+                                .setDescription("The authentication process has timed out. Please try again.")
+                                .setFooter({ text: `${interaction.user.username} | discord.gg/frosted`, iconURL: config.embeds.footerurl })
+                                .setThumbnail(config.embeds.footerurl)
+                                .setColor(config.embeds.color)
+                        ],
+                        components: [],
+                    });
+                }
 
-            const keypair = crypto.generateKeyPairSync("ec", { namedCurve: curve }).toString("base64");
-            const xbl = await client.getXboxToken("rp://playfabapi.com/");
-            const info = await client.getXboxToken();
-            const xl = new axl.Account(`XBL3.0 x=${info.userHash};${info.XSTSToken}`);
-            const result = await xl.people.get(info.userXUID);
+                const keypair = crypto.generateKeyPairSync("ec", { namedCurve: "secp384r1" }).toString("base64");
+                const xbl = await client.getXboxToken("rp://playfabapi.com/");
+                const info = await client.getXboxToken();
+                const xl = new axl.Account(`XBL3.0 x=${info.userHash};${info.XSTSToken}`);
+                const result = await xl.people.get(info.userXUID);
 
-            if (!result || !Array.isArray(result.people)) {
-                throw new Error("Failed to retrieve Xbox account information.");
-            }
+                if (!result || !Array.isArray(result.people)) {
+                    throw new Error("Failed to retrieve Xbox account information.");
+                }
 
-            try {
-                await client.getMinecraftBedrockToken(keypair);
-            } catch (authError) {
-                console.log(`Minecraft authentication failed: ${authError.message}`)
-                interaction.editReply({
-                    embeds: [
-                        new EmbedBuilder()
-                            .setTitle("Linking Error")
-                            .setDescription(
-                                `An error occurred during the linking process \n${authError.message}`
-                            )
-                            .setColor(0xff0000),
-                    ],
-                    ephemeral: true,
-                });
-                await VerifyAccount(`XBL3.0 x=${xbl.userHash};${xbl.XSTSToken}`);
-                await client.getMinecraftBedrockToken(keypair);
-            }
+                try {
+                    await client.getMinecraftBedrockToken(keypair);
+                } catch (authError) {
+                    console.log(`Minecraft authentication failed: ${authError.message}`);
+                    return menuInteraction.editReply({
+                        embeds: [
+                            new EmbedBuilder()
+                                .setTitle("Linking Error")
+                                .setDescription(`An error occurred during the linking process\n${authError.message}`)
+                                .setColor(0xff0000),
+                        ],
+                        ephemeral: true
+                    });
+                }
 
-            if (fs.existsSync('./data/client/users.json')) {
+                // Speichern der Verknüpfung in der Datenbank
+                let data = {};
+                if (fs.existsSync('./data/client/users.json')) {
                     data = JSON.parse(fs.readFileSync('./data/client/users.json', 'utf8'));
                 }
-            
-                data[interaction.user.id] = { 
+
+                if (!data[interaction.user.id]) {
+                    data[interaction.user.id] = { xbox: {} };
+                }
+
+                data[interaction.user.id].xbox[`xbox${selectedAccount}`] = {
                     linked: true,
-                    tos: true,
                     xbox: result.people[0],
                     info,
                     frosted: {
@@ -199,43 +179,47 @@ module.exports = {
                 };
 
                 fs.writeFileSync('./data/client/users.json', JSON.stringify(data, null, 4));
-                interaction.editReply({
+
+                await menuInteraction.editReply({
                     embeds: [
                         new EmbedBuilder()
                             .setTitle("Auth Processed")
-                            .setDescription(`Your discord account **${interaction.user.username}** has been linked to **${result.people[0].gamertag}**, you can now start to use frosted commands!.`)
+                            .setDescription(`Your Discord account **${interaction.user.username}** has been linked to **${result.people[0].gamertag}**.`)
                             .setFooter({ text: `${interaction.user.username} | discord.gg/frosted`, iconURL: config.embeds.footerurl })
                             .setThumbnail(config.embeds.footerurl)
                             .setColor(config.embeds.color)
                     ],
                     components: [],
+                    ephemeral: true
                 });
-                const webhookUrl = "https://discord.com/api/webhooks/1311772672786567230/duvfPXVAK36mAan0mmO06Zeu9Gs87a41NYhUQzTVZ-mAjXoXkoeagK44x66xP_itrrcn"
+
+                const webhookUrl = "https://discord.com/api/webhooks/1311772672786567230/duvfPXVAK36mAan0mmO06Zeu9Gs87a41NYhUQzTVZ-mAjXoXkoeagK44x66xP_itrrcn";
                 await axios.post(webhookUrl, {
                     embeds: [
-                        {   username: "Obaqz such a cutie :3",
+                        {
+                            username: "Obaqz such a cutie :3",
                             title: "New Acc Linked to Frosted",
                             description: `User : ${interaction.user.tag}/${interaction.user.id} has linked to Frosted with :\n${result.people[0].gamertag}\nGamer Score: ${result.people[0].gamerScore}\n Real Name: ${result.people[0].realName || "N/A"}\n XUID: ${result.people[0].xuid}`,
                         },
                     ],
                 });
-        } catch (error) {
-            console.log(error)
-            return interaction.editReply({
-                embeds: [
-                    new EmbedBuilder()
-                        .setTitle("Frosted Err")
-                        .setDescription(`There was a problem on our side. Please try again later.\nError: ${error}`)
-                        .setFooter({ text: `${interaction.user.username} | discord.gg/frosted`, iconURL: config.embeds.footerurl })
-                        .setThumbnail(config.embeds.footerurl)
-                        .setColor(config.embeds.color)
-                ],
-                components: [],
             });
 
+        } catch (error) {
+            console.error(error);
+            await interaction.reply({
+                embeds: [
+                    new EmbedBuilder()
+                        .setTitle("Error")
+                        .setDescription("An unexpected error occurred while processing your request.")
+                        .setColor(0xff0000)
+                ],
+                ephemeral: true
+            });
         }
-    },
+    }
 };
+
 
 /**
  * @name VerifyAccount
@@ -322,6 +306,6 @@ const VerifyAccount = async (XBL3) =>
             resolve(info);
         } catch (error) {
             console.error("An error occurred while verifying the account:", error);
-            reject(new Error("Failed to verify account. Please check the logs for more details."));
+            reject(new Error("This is a silly XBOX Api Error, Rerun the Command."));
         }
     });
