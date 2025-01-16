@@ -26,6 +26,14 @@ module.exports = {
         .setIntegrationTypes(0, 1)
         .setContexts(0, 1, 2)
         .setDescription("Add or remove an Xbox friend based on gamertag.")
+        .addIntegerOption(option =>
+            option.setName('account')
+                .setDescription('Account you wanna use')
+                .setRequired(true)
+                .addChoices(
+                    { name: 'Account 1', value: 1 },
+                    { name: 'Account 2', value: 2 },
+                    { name: 'Account 3', value: 3 }))
         .addStringOption(option => 
             option.setName("action")
                 .setDescription("Choose to add or remove a friend")
@@ -42,6 +50,7 @@ module.exports = {
         ),
 
     async execute(interaction) {
+        const account = interaction.options.getInteger('account') 
         await interaction.reply({ embeds: [
             new EmbedBuilder()
                 .setTitle('Frosted Loading')
@@ -55,7 +64,7 @@ module.exports = {
             const user = interaction.user.id;
             
 
-            if (!fs.existsSync(`./data/client/frosted/${interaction.user.id}`)) {
+            if (!fs.existsSync(`./data/client/frosted/${interaction.user.id}/profile${account}`)) {
                 await interaction.editReply({
                     embeds: [
                         {
@@ -70,7 +79,7 @@ module.exports = {
             }
 
             
-            const authflow = new PrismarineAuth(interaction.user.id, `./data/client/frosted/${interaction.user.id}`, { 
+            const authflow = new PrismarineAuth(interaction.user.id, `./data/client/frosted/${interaction.user.id}/profile${account}`, { 
                 flow: "live", 
                 authTitle: Titles.MinecraftNintendoSwitch, 
                 deviceType: "Nintendo", 
