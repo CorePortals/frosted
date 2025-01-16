@@ -8,14 +8,22 @@ module.exports = {
     .setName('realmlist')
     .setIntegrationTypes(0, 1)
     .setContexts(0, 1, 2)
-    .setDescription('Lists all realms in your realm list with their IDs.'),
+    .setDescription('Lists all realms in your realm list with their IDs.')
+    .addIntegerOption(option =>
+      option.setName('account')
+          .setDescription('Account you wanna use')
+          .setRequired(true)
+          .addChoices(
+              { name: 'Account 1', value: 1 },
+              { name: 'Account 2', value: 2 },
+              { name: 'Account 3', value: 3 })),
 
   execute: async (interaction) => {
     try {
       await interaction.deferReply({ ephemeral: true });
-
+      const account = interaction.options.getInteger('account')
       const profilesFolder = `./data/client/frosted/${interaction.user.id}`;
-      if (!fs.existsSync(`./data/client/frosted/${interaction.user.id}`)) {
+      if (!fs.existsSync(`./data/client/frosted/${interaction.user.id}/profile${account}`)) {
         await interaction.editReply({
             embeds: [
                 {
