@@ -27,7 +27,7 @@ module.exports = {
             option.setName('invite')
                 .setDescription('Realm invite code or Realm ID')
                 .setRequired(true)
-                .setMinLength(11)
+                .setMinLength(8)
                 .setMaxLength(15)),
     async execute(interaction) {
         const invite = interaction.options.getString('invite');
