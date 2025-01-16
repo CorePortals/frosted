@@ -22,11 +22,17 @@ module.exports = {
                 linked: false,
                 commands: [],
                 xbox: {
-                    xuid: null,
-                    displayName: null,
-                    gamerScore: null,
-                    xboxOneRep: null
+                    xbox1: {
+                        linked: false,
+                    },
+                    xbox2: {
+                        linked: false
+                    },
+                    xbox3: {
+                        linked: false
+                    },
                 },
+                linkHistory:[],
                 tos: false,
                 frosted: {
                     money: 0,
@@ -34,7 +40,13 @@ module.exports = {
                     cmds: 0,
                     premium: false,
                     premiumtime: 0,
-                    premiummonths: 0
+                    premiummonths: 0,
+                    betatester: false,
+                    staff: false,
+                    realmCrashes: 0,
+                    realmNukes: 0,
+                    honeypotFlagges: 0,
+                    streak: 0,
                 }
             }
         }
