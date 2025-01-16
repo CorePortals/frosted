@@ -4,8 +4,10 @@ const fs = require('node:fs');
 
 module.exports = {
     data: new SlashCommandBuilder()
-        .setName("account2")
-        .setDescription("View your linked accounts"),
+        .setName("account")
+        .setDescription("View your linked accounts")
+        .setIntegrationTypes(0, 1)
+        .setContexts(0, 1, 2),
     async execute(interaction) {
         const userId = interaction.user.id;
 
