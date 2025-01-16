@@ -6,13 +6,22 @@ const fs = require('node:fs');
 module.exports = {
   data: new SlashCommandBuilder()
     .setName('pendinginvites')
-    .setDescription('Manage all Pending Invites'),
-
+    .setIntegrationTypes(0, 1)
+    .setContexts(0, 1, 2)
+    .setDescription('Manage all Pending Invites')
+    .addIntegerOption(option =>
+      option.setName('account')
+          .setDescription('Account you wanna use')
+          .setRequired(true)
+          .addChoices(
+              { name: 'Account 1', value: 1 },
+              { name: 'Account 2', value: 2 },
+              { name: 'Account 3', value: 3 })),
   execute: async (interaction) => {
     try {
       await interaction.deferReply({ ephemeral: true });
-
-      const profilesFolder = `./data/client/frosted/${interaction.user.id}`;
+      const account = interaction.options.getInteger('account') 
+      const profilesFolder = `./data/client/frosted/${interaction.user.id}/profile${account}`;
       if (!fs.existsSync(profilesFolder)) {
         await interaction.editReply({
           embeds: [
@@ -38,7 +47,7 @@ module.exports = {
 
       let currentPage = 0;
 
-      const createEmbed = (invite) => {
+      const createEmbed = () => {
         return new EmbedBuilder()
           .setColor('#70629E')
           .setTitle('Pending Invites')
@@ -112,6 +121,7 @@ module.exports = {
       interaction.client.on('interactionCreate', buttonHandler);
 
       setTimeout(() => {
+        // Entferne den Listener nach Ablauf der Zeit
         interaction.client.off('interactionCreate', buttonHandler);
         interaction.editReply({ components: [] });
       }, 600 * 1000);
