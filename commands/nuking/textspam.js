@@ -14,11 +14,19 @@ module.exports = {
     .setDescription('Spams realm with a message')
     .setIntegrationTypes(0, 1)
     .setContexts(0, 1, 2)
+    .addIntegerOption(option =>
+        option.setName('account')
+            .setDescription('Account you wanna use')
+            .setRequired(true)
+            .addChoices(
+                { name: 'Account 1', value: 1 },
+                { name: 'Account 2', value: 2 },
+                { name: 'Account 3', value: 3 }))
     .addStringOption(option =>
         option.setName('invite')
             .setDescription('Realm Code To Spam')
             .setRequired(true)
-            .setMinLength(11)
+            .setMinLength(8)
     )
     .addStringOption(option =>
         option.setName('custommessage')
@@ -68,7 +76,7 @@ module.exports = {
         const packets = interaction.options.getInteger('packets') 
         const userID = interaction.user.id
         let disconnected = false;
-
+        const account = interaction.options.getInteger('account') 
         try {
             await interaction.reply({
                 embeds: [
@@ -81,7 +89,7 @@ module.exports = {
                 ],ephemeral: true,
             });
 
-            if (!fs.existsSync(`./data/client/frosted/${interaction.user.id}`)) {
+            if (!fs.existsSync(`./data/client/frosted/${interaction.user.id}/profile${account}`)) {
                 await interaction.editReply({
                     embeds: [
                         {
@@ -95,27 +103,12 @@ module.exports = {
                 return;
             }
 
-            const whitelist = JSON.parse(fs.readFileSync('./data/client/whitelist.json', 'utf8'));
-        const isWhitelisted = whitelist.some(entry => entry.realmCode === invite);
-        if (isWhitelisted) {
-            return interaction.editReply({
-                embeds: [
-                    new EmbedBuilder()
-                        .setTitle('Frosted Error')
-                        .setDescription(`The invite \`${invite}\` is in the whitelist and cannot be nuked.`)
-                        .setFooter({ text: `${interaction.user.username} | discord.gg/frosted`, iconURL: config.embeds.footerurl })
-                        .setThumbnail(config.embeds.footerurl)
-                        .setColor(config.embeds.color)
-                ]
-            });
-        }
-
             const crypto = require("node:crypto");
             const curve = "secp384r1";
             const keypair = crypto.generateKeyPairSync("ec", { namedCurve: curve }).toString("base64");
             const bot = new Authflow(
                 interaction.user.id, 
-                path.resolve(`./data/client/frosted/${interaction.user.id}`), 
+                path.resolve(`./data/client/frosted/${interaction.user.id}/profile${account}`), 
                 {
                     flow: 'live',
                     authTitle: 'MinecraftNintendoSwitch',
@@ -132,6 +125,7 @@ module.exports = {
                     return xboxToken;
                 } catch (error) {
                     console.error('Error while Refrshing', error);
+                    
                     await interaction.editReply({
                         embeds: [
                             new EmbedBuilder()
@@ -197,7 +191,7 @@ module.exports = {
             }
 
             const client = createClient({
-                profilesFolder: `./data/client/frosted/${interaction.user.id}`,
+                profilesFolder: `./data/client/frosted/${interaction.user.id}/profile${account}`,
                 username: interaction.user.id,
                 offline: false,
                 realms: {
@@ -279,25 +273,30 @@ module.exports = {
                                 .setColor(config.embeds.color)
                         ]
                     });
-
-                    setTimeout(() => {
+                    const endTime = Date.now() + 30000;
+                    const spamInterval = setInterval(() => {
                         if (disconnected) return;
-                            let message = customMessage + (bypass ? ` ${genrandomstring(8)}` : '');
-                            let command = rainbow ? colorizeText(message, true) : message;
-                            let finalMessage = `${command}\n§r§ `.repeat(spamIntensity);
-
-                            client.write("text", {
-                                filtered_message: "",
-                                type: "chat",
-                                needs_translation: false,
-                                source_name: client.profile.name,
-                                message: finalMessage,
-                                xuid: "0",
-                                platform_chat_id: "0"
-                            });
+                        if (Date.now() >= endTime) {
+                            clearInterval(spamInterval);
+                            client.disconnect();
+    
+                            return;
+                        }
                         
+                        let message = customMessage + (bypass ? ` ${generateRandomString(8)}` : '');
+                        let command = rainbow ? colorizeText(message, true) : message;
+                        let finalMessage = `${command}\n§r§ `.repeat(spamIntensity);
+    
+                        client.write("text", {
+                            filtered_message: "",
+                            type: "chat",
+                            needs_translation: false,
+                            source_name: client.profile.name,
+                            message: finalMessage,
+                            xuid: "0",
+                            platform_chat_id: "0"
+                        });
                     }, 0);
-
                     setTimeout(() => {
                         if (!disconnected) {
                             client.disconnect();
@@ -319,15 +318,16 @@ module.exports = {
                     throw error;
                 }
             });
+            function parseKickMessage(message) {return message;}
             client.on('kick', async (err) => {
                 if (disconnected) return;
                 disconnected = true;
-                console.error(`[${new Date().toLocaleTimeString()}] Client kick: ${err}`);
+                console.error(`[${new Date().toLocaleTimeString()}] Client kick: ${parseKickMessage(err.message)}`);
                 await interaction.editReply({
                     embeds: [
                         new EmbedBuilder()
                             .setTitle('Frosted Error')
-                            .setDescription(`CLient Kicked from Realm :\n${err} `)
+                            .setDescription(`Client Kicked from Realm :\n${err} `)
                             .setFooter({ text: `${interaction.user.username} | discord.gg/frosted`, iconURL: config.embeds.footerurl })
                             .setThumbnail(config.embeds.footerurl)
                             .setColor(config.embeds.color)
