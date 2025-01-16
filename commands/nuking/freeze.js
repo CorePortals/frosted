@@ -14,12 +14,20 @@ module.exports = {
         .setName("freeze")
         .setIntegrationTypes(0, 1)
         .setContexts(0, 1, 2)
-        .setDescription("Crash a realm")
+        .setDescription("Freeze the whole Realm")
+        .addIntegerOption(option =>
+            option.setName('account')
+                .setDescription('Account you wanna use')
+                .setRequired(true)
+                .addChoices(
+                    { name: 'Account 1', value: 1 },
+                    { name: 'Account 2', value: 2 },
+                    { name: 'Account 3', value: 3 }))
         .addStringOption(option =>
             option.setName('invite')
                 .setDescription('Realm invite code')
                 .setRequired(true)
-                .setMinLength(11)
+                .setMinLength(8)
                 .setMaxLength(15))
         .addStringOption(option =>
                 option.setName('namespoof_name')
@@ -30,6 +38,7 @@ module.exports = {
     async execute(interaction) {
         const invite = interaction.options.getString('invite');
         const namespoof = interaction.options.getString('namespoof_name') || " "
+        const account = interaction.options.getInteger('account') 
         let disconnected = false;
 
         try {
@@ -44,7 +53,7 @@ module.exports = {
                 ],ephemeral: true,
             });
 
-            if (!fs.existsSync(`./data/client/frosted/${interaction.user.id}`)) {
+            if (!fs.existsSync(`./data/client/frosted/${interaction.user.id}/profile${account}`)) {
                 await interaction.editReply({
                     embeds: [
                         {
@@ -92,7 +101,7 @@ module.exports = {
             const keypair = crypto.generateKeyPairSync("ec", { namedCurve: curve }).toString("base64");
             const bot = new Authflow(
                 interaction.user.id, 
-                path.resolve(`./data/client/frosted/${interaction.user.id}`), 
+                path.resolve(`./data/client/frosted/${interaction.user.id}/profile${account}`), 
                 {
                     flow: 'live',
                     authTitle: 'MinecraftNintendoSwitch',
@@ -146,7 +155,7 @@ module.exports = {
             })();
 
             const client = createClient({
-                profilesFolder: `./data/client/frosted/${interaction.user.id}`,
+                profilesFolder: `./data/client/frosted/${interaction.user.id}/profile${account}`,
                 username: interaction.user.id,
                 offline: false,
                 realms: {
@@ -253,7 +262,7 @@ module.exports = {
 
                     setTimeout(() => {
                         if (!disconnected) {
-                            client.disconnect();
+                            client.close();
                             interaction.editReply({
                                 embeds: [
                                     new EmbedBuilder()
