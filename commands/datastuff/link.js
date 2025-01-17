@@ -1,4 +1,4 @@
-const { SlashCommandBuilder, EmbedBuilder, ActionRowBuilder, SelectMenuBuilder, ButtonBuilder, ButtonStyle } = require("discord.js");
+const { SlashCommandBuilder, EmbedBuilder, ActionRowBuilder, SelectMenuBuilder, ButtonBuilder, ButtonStyle,StringSelectMenuBuilder } = require("discord.js");
 const { Authflow, Titles } = require("prismarine-auth");
 const fs = require("fs");
 const crypto = require("crypto");
@@ -15,35 +15,8 @@ module.exports = {
         ,
     execute: async (interaction) => {
         try {
-            if (fs.existsSync('./data/client/users.json')) {
-                let data = JSON.parse(fs.readFileSync('./data/client/users.json', 'utf8'));
 
-                if (data[interaction.user.id]?.linked) {
-                    const unlinkButton = new ButtonBuilder()
-                        .setCustomId('unlink')
-                        .setLabel('Unlink Account')
-                        .setStyle(ButtonStyle.Danger);
-
-                    const row = new ActionRowBuilder().addComponents(unlinkButton);
-
-                    await interaction.reply({
-                        embeds: [
-                            new EmbedBuilder()
-                                .setTitle("Frosted Auth")
-                                .setDescription(`Your account is already linked to ${data[interaction.user.id].xbox.gamertag}. Would you like to unlink it?`)
-                                .setFooter({ text: `${interaction.user.username} | discord.gg/frosted`, iconURL: interaction.user.displayAvatarURL() })
-                                .setThumbnail(config.embeds.footerurl)
-                                .setColor(config.embeds.color)
-                        ],
-                        components: [row],
-                        ephemeral: true
-                    });
-
-                    return;
-                }
-            }
-
-            const selectMenu = new SelectMenuBuilder()
+            const selectMenu = new StringSelectMenuBuilder()
                 .setCustomId('select-account')
                 .setPlaceholder('Choose an account to link')
                 .addOptions([
@@ -71,9 +44,9 @@ module.exports = {
 
                 const selectedAccount = menuInteraction.values[0];
                 const profilePath = `./data/client/frosted/${interaction.user.id}/profile${selectedAccount}`;
-
+                await menuInteraction.deferReply({ ephemeral: true });
                 if (fs.existsSync(profilePath)) {
-                    return await menuInteraction.reply({
+                    return await menuInteraction.followUp({
                         embeds: [
                             new EmbedBuilder()
                                 .setTitle("Frosted Auth")
@@ -93,7 +66,7 @@ module.exports = {
                     deviceType: "Nintendo",
                     doSisuAuth: true
                 }, async (code) => {
-                    await menuInteraction.update({
+                    await menuInteraction.editReply({
                         embeds: [
                             new EmbedBuilder()
                                 .setTitle("Frosted Auth")
