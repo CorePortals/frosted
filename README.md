@@ -1,5 +1,5 @@
 ## Frosted Leaked
-
+THIS WAS MADE BY VISION AND LEAKED BY OBAQZ / 0DEVS
 **` ⚡ `** **`free obaq ⚡🔫`** **` ⚡ `**
 **` ⚡ `** **`free obaq ⚡🔫`** **` ⚡ `**
 **` ⚡ `** **`free obaq ⚡🔫`** **` ⚡ `**
@@ -35,9 +35,8 @@ Found in each command file in `./commands/nuking`, you will find a genrandomstri
 He has not asked for consent for any of this code he has stolen. Furthermore, when he has asked, and the other person has said no, he'll still take the code for his own bot.
 
 ## Poorly secure bot
-This bot does not have good security. Data could've been leaked, instead I have deleted those files. The bot is not secure at all because the files were saved raw. Meaning it was not being saved in a proper database. Your accounts linked to Frosted could've been used or stolen without your consent! Which is not good for you if you had used this bot. I recommend that you go and secure your account as soon as possible.
-
 You should never use your main account while linking to a discord bot like this. Even when I suggest alternatives to you, you should never use your main account.
+
 
 ## What do I do now knowing this?
 You stay away from TSL's community, leave it entirely. He is not trustable with your data and any other information. He can't keep up on what he wants to do yet. He has considered both realms and nuking, but always goes towards nuking, and then later saving realms. He can't keep it up. He doesn't listen to anybody. So therefore, this is his punishment for it all.
@@ -56,6 +55,3 @@ Oppenheimer - https://discord.gg/JMRnkFGVeE
 
 These bots can actually give more room for experience other than TSL's bot.
 
-
-## Poorly secure bot
-You should never use your main account while linking to a discord bot like this. Even when I suggest alternatives to you, you should never use your main account.
