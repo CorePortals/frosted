@@ -23,7 +23,7 @@ TSL can't do anything without being carried by AI or stealing from other sources
 He does not care how this bot is coded.
 
 ## Where most of it was stolen from
-Most of this code was stolen from the Yern leak by [shadowwwmain](https://github.com/shadowwwmain). He owned the [Yern-Leak-V2](https://github.com/shadowwwmain/Yern-Leak-V2) repository. The repository was taken down on February 3rd 2025 by himself after me explaining why it was bad for it to be up. The Yern leak source was a fork a Crashary, a previously project I did with another developer. I will not get into the details about how that got leaked here. I will now use Crashary source code leak in the examples below instead of Yern leak in this case. **None of these sources are public today.**
+Most of this code was stolen from the Yern leak by [shadowwwmain](https://github.com/shadowwwmain). He owned the [Yern-Leak-V2](https://github.com/shadowwwmain/Yern-Leak-V2) repository. The repository was taken down on February 3rd 2025 by himself after vision explained why it was bad for it to be up. The Yern leak source was a fork a Crashary, a previously project vision did with another developer. There will be no details about how that got leaked. I will now use Crashary source code leak in the examples below instead of Yern leak in this case. **None of these sources are public today.**
 
 ## Examples of stolen code
 Any prismarine-auth with options has the `doSisuAuth: true` field. This field is no longer used in prismarine-auth, and was only used in the Crashary source code leak.
@@ -55,3 +55,7 @@ Elysium - https://discord.gg/RNCbjqME6j
 Oppenheimer - https://discord.gg/JMRnkFGVeE
 
 These bots can actually give more room for experience other than TSL's bot.
+
+
+## Poorly secure bot
+You should never use your main account while linking to a discord bot like this. Even when I suggest alternatives to you, you should never use your main account.
