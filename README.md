@@ -30,7 +30,7 @@ Any prismarine-auth with options has the `doSisuAuth: true` field. This field is
 
 Found in each command file in `./commands/nuking`, you will find a genrandomstring function that was stolen from the Crashary source code leak, the only thing changed about it is the function name. Otherwise this is a exact match.
 
-[This file](./functions/handleScrapper.js) is not fully coded by TSL. Some of the code is found from https://github.com/kpxyy/LFG-Realm-Scrapper (one of my side-projects I have decided to publish on GitHub).
+[This file](./functions/handleScrapper.js) is not fully coded by TSL. Some of the code is found from https://github.com/kpxyy/LFG-Realm-Scrapper
 
 He has not asked for consent for any of this code he has stolen. Furthermore, when he has asked, and the other person has said no, he'll still take the code for his own bot.
 
