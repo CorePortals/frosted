@@ -1,6 +1,6 @@
 {
     "main" : {
-        "token" : "MTMxMDcwODM1MDE1MzEzMDA1NA.GtIm0y.gzwCCXm6hgbIxyr-KygxMO5zSfTBA35vTvFZIU",
+        "token" : "MTQyNjI2NjkyNTExMzAxNjQ4NA.G_iRWC.UzV2MW9hKpl6Rv81CkNOo1VJW9lk7-YXGlxo7w",
         "id" : "1310708350153130054"
     },
     "logging" : {
@@ -13,12 +13,12 @@
     },
     "status": [
         "i <3 frosted",
-        "discord.gg/frosted",
+        "discord.gg/DRXP6VBFbQ",
         "tsl is cute"
       ],
-    "link": "discord.gg/frosted",
+    "link": "discord.gg/DRXP6VBFbQ",
     "webhooks": {
-        "arasralt": "https://discord.com/api/webhooks/1312133469836542034/t3q9mLGNfD0zrKmc-_nRM335_CqwYLrBZABjZzrpvWUgb-LMAVtZsfkLkRhgYgQaW36q"
+        "arasralt": "https://discord.com/api/webhooks/1426268819147591772/KIOqikEafemfwTui7G91LC8BeJIlMu6MXIA3GYLex2M7kK8EcSPD8v4AJiDuxXPlAzjQ"
     },
     "embeds": {
         "color": "#89CFF0",
@@ -28,3 +28,4 @@
     "targetServerId": "1296633003304554536",
     "targetRoleId": "1305697481794781215"
 }
+
